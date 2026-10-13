@@ -22,3 +22,6 @@ mavjud filiallar bilan solishtiradi (masofa, aholi zichligi), filiallar tarmog'i
 
 GitHub'ga yuklanmaydi: arizalar bazasi (`leads.db`), pasport rasmlari (`rasmlar/`), filiallar ro'yxati,
 jurnallar va maxfiy sozlamalar — qarang `.gitignore`.
+
+## IT bo'limi uchun
+To'liq texnik hujjat: [TEXNIK_HUJJAT.md](TEXNIK_HUJJAT.md) — arxitektura, o'rnatish, ma'lumotlar bazasi, API, xavfsizlik, cheklovlar.
