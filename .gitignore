@@ -1,0 +1,19 @@
+# --- Shaxsiy ma'lumotlar va maxfiy kalitlar (GitHub'ga YUKLANMAYDI) ---
+config_local.py
+leads.db
+leads.db-*
+rasmlar/
+logs/
+data/filiallar.json
+data/backups/
+data/filial_tarix.jsonl
+*.xlsx
+*.csv
+
+# --- Ichki Python (katta, har kompyuterda alohida) ---
+python/
+
+# --- Vaqtinchalik ---
+__pycache__/
+*.pyc
+*.tmp

@@ -1,0 +1,1271 @@
+<!doctype html>
+<html lang="uz">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>YETKAZ — Filiallar boshqaruvi</title>
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 48 48'%3E%3Crect width='48' height='48' rx='12' fill='%23131b29'/%3E%3Cpath d='M15 30a9.5 9.5 0 0 1 18 0' fill='none' stroke='%23efebe1' stroke-width='3.4' stroke-linecap='round'/%3E%3Ccircle cx='15' cy='30' r='3.6' fill='%23efebe1'/%3E%3Ccircle cx='15' cy='30' r='1.4' fill='%23131b29'/%3E%3Ccircle cx='33' cy='30' r='4.2' fill='%234a7f99'/%3E%3Ccircle cx='33' cy='30' r='1.6' fill='%23131b29'/%3E%3C/svg%3E">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Archivo:wght@400;500;600;700;800;900&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css">
+<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+<link rel="stylesheet" href="https://unpkg.com/leaflet.markercluster@1.5.3/dist/MarkerCluster.css">
+<script src="https://unpkg.com/leaflet.markercluster@1.5.3/dist/leaflet.markercluster.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
+<style>
+:root{
+  --amber:#e0a21b; --amber-d:#b07a06; --amber-bg:#fbf1d8; --amber-line:#efd38e;
+  --bg:#efebe1; --card:#f8f5ee; --soft:#ebe6da; --line:#ddd5c5; --text:#131b29; --muted:#6e7380;
+  --navy:#131b29; --navy2:#1f2a3d; --cream:#efebe1; --teal:#4a7f99; --teal2:#8fb3c4;
+  --gray:#8a8f99; --blue:#3d6fb6; --orange:#c9822e; --purple:#7a5ea8; --cyan:#3f8fa6; --green:#3d8b5f; --red:#c2493f;
+  --shadow:none; --mono:"JetBrains Mono",ui-monospace,Consolas,monospace; --sans:Archivo,system-ui,"Segoe UI",sans-serif;
+}
+:root[data-theme="dark"]{--bg:#0f1520;--card:#161f2e;--soft:#1d2738;--line:#273246;--text:#ece6d9;--muted:#9aa2af;--teal:#6fa3bd;--navy2:#26334a}
+@media (prefers-color-scheme: dark){:root:not([data-theme="light"]){--bg:#0f1520;--card:#161f2e;--soft:#1d2738;--line:#273246;--text:#ece6d9;--muted:#9aa2af;--teal:#6fa3bd;--navy2:#26334a}}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--text);font:14px/1.45 var(--sans)}
+button{font:inherit;color:inherit;cursor:pointer}
+a{color:var(--teal)}
+.mono{font-family:var(--mono);text-transform:uppercase;letter-spacing:.14em;font-size:11px;color:var(--muted);font-weight:500}
+/* header */
+.top{background:var(--navy);color:var(--cream);display:flex;align-items:center;gap:14px;padding:10px 22px;position:sticky;top:0;z-index:1100}
+.top svg{flex:none}
+.word{font-weight:900;font-size:22px;letter-spacing:-.01em;line-height:1}
+.top .mono{color:#97a3b6;margin-top:4px;font-size:10.5px}
+.top .sep{width:1px;height:34px;background:#36435b;margin:0 4px}
+.top .sp{flex:1}
+.live{display:flex;align-items:center;gap:7px;font:500 11px var(--mono);letter-spacing:.1em;color:#c4ccd9;text-transform:uppercase}
+.live i{width:8px;height:8px;border-radius:50%;background:var(--teal2);box-shadow:0 0 0 3px rgba(143,179,196,.25)}
+.tbtn{background:transparent;border:1px solid #36435b;color:var(--cream);border-radius:9px;padding:7px 12px;font-size:12.5px;font-weight:600;text-decoration:none;display:inline-flex;align-items:center;gap:6px}
+.tbtn:hover{background:var(--navy2)}
+main{padding:18px 22px 40px;max-width:1640px;margin:0 auto;display:grid;grid-template-columns:minmax(0,1fr);gap:16px}
+main > *{min-width:0}
+.card{background:var(--card);border:1px solid var(--line);border-radius:14px}
+/* KPI */
+.kpis{display:grid;grid-template-columns:repeat(7,minmax(0,1fr));gap:12px}
+@media (max-width:1250px){.kpis{grid-template-columns:repeat(4,minmax(0,1fr))}}
+@media (max-width:640px){.kpis{grid-template-columns:repeat(2,minmax(0,1fr))}}
+.kpi{padding:14px 16px;position:relative;cursor:pointer;transition:border-color .15s}
+.kpi:hover{border-color:var(--teal2)} .kpi.on{border-color:var(--teal);box-shadow:0 0 0 2px rgba(74,127,153,.18)}
+.kpi .v{font-size:30px;font-weight:900;margin:6px 0 1px;line-height:1.1;letter-spacing:-.02em}
+.kpi .s{font-size:12px;color:var(--muted)}
+.kpi .d{position:absolute;top:16px;right:16px;width:9px;height:9px;border-radius:50%}
+.kpi.dark{background:var(--navy);color:var(--cream);border-color:var(--navy)} .kpi.dark .mono,.kpi.dark .s{color:#9aa6b8}
+/* tabs */
+.tabs{display:grid;grid-template-columns:repeat(5,minmax(0,1fr));gap:10px;padding:12px;border-bottom:1px solid var(--line)}
+@media (max-width:900px){.tabs{grid-template-columns:repeat(5,minmax(150px,1fr));overflow-x:auto;scrollbar-width:none}}
+.tab{display:grid;grid-template-columns:44px 1fr;grid-template-rows:auto auto;column-gap:12px;align-items:center;text-align:left;
+  background:var(--soft);border:1px solid transparent;border-radius:12px;padding:12px 14px;color:var(--text);transition:background .15s,border-color .15s,transform .15s}
+.tab:hover{border-color:var(--teal2);transform:translateY(-1px)}
+.tab .ti{grid-row:1/3;width:44px;height:44px;border-radius:11px;background:var(--card);display:grid;place-items:center;color:var(--teal);border:1px solid var(--line)}
+.tab .ti svg{width:22px;height:22px}
+.tab .tt{display:flex;align-items:baseline;gap:7px;font-weight:800;font-size:16.5px;line-height:1.2}
+.tab .tt small{font:500 10.5px var(--mono);letter-spacing:.1em;color:var(--muted)}
+.tab em{font-style:normal;font-size:12.5px;color:var(--muted);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.tab.on{background:var(--navy);color:var(--cream);border-color:var(--navy);box-shadow:0 6px 18px rgba(19,27,41,.18)}
+.tab.on .ti{background:var(--teal);border-color:var(--teal);color:#fff}
+.tab.on .tt small,.tab.on em{color:#aab6c8}
+:root[data-theme="dark"] .tab.on{background:var(--teal);border-color:var(--teal)} :root[data-theme="dark"] .tab.on .ti{background:var(--navy);border-color:var(--navy)}
+.pane{padding:16px;display:none} .pane.on{display:block}
+.vgrid{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:4px 28px}
+@media (max-width:1200px){.vgrid{grid-template-columns:repeat(2,minmax(0,1fr))}}
+.vrow{display:grid;grid-template-columns:130px 1fr 38px;align-items:center;gap:10px;padding:5px 6px;border-radius:8px;cursor:pointer}
+.vrow:hover{background:var(--soft)} .vrow.on{background:var(--soft);outline:1px solid var(--teal2)}
+.vrow b{text-align:right}
+.track{height:7px;background:var(--soft);border-radius:9px;overflow:hidden}
+.track span{display:block;height:100%;border-radius:9px;background:linear-gradient(90deg,var(--navy),var(--teal))}
+:root[data-theme="dark"] .track span{background:linear-gradient(90deg,var(--teal),var(--teal2))}
+/* work area */
+.work{display:grid;grid-template-columns:minmax(0,1fr) 410px;gap:16px;align-items:start}
+@media (max-width:1100px){.work{grid-template-columns:1fr}}
+.filters{display:flex;flex-wrap:wrap;gap:8px;padding:14px 14px 10px}
+.inp{font:inherit;color:var(--text);padding:8px 11px;border:1px solid var(--line);border-radius:9px;background:var(--card)}
+.inp:focus{outline:2px solid var(--teal2);outline-offset:-1px}
+.inp.grow{flex:1;min-width:220px}
+.chk{display:inline-flex;align-items:center;gap:6px;border:1px solid var(--line);border-radius:9px;padding:7px 10px;font-size:12.5px;font-weight:600;color:var(--muted);cursor:pointer;user-select:none}
+.chips{display:flex;flex-wrap:wrap;gap:7px;padding:0 14px 12px;border-bottom:1px solid var(--line)}
+.chip{border:1px solid var(--line);background:var(--card);border-radius:999px;padding:5px 11px;font-size:12.5px;font-weight:600;display:inline-flex;align-items:center;gap:6px}
+.chip i{width:8px;height:8px;border-radius:50%} .chip.on{background:var(--navy);color:var(--cream);border-color:var(--navy)}
+:root[data-theme="dark"] .chip.on{background:var(--teal);border-color:var(--teal)}
+.chip b{font-weight:800}
+.rows{max-height:760px;overflow:auto}
+.lr{display:grid;gap:14px;align-items:center;padding:12px 14px;border-bottom:1px solid var(--line);cursor:pointer}
+.lr.lead{grid-template-columns:96px minmax(150px,1.1fr) minmax(160px,1.4fr) 150px 120px minmax(110px,1fr)}
+.lr.br{grid-template-columns:minmax(170px,1.3fr) 140px minmax(150px,1.2fr) 92px 80px 100px minmax(120px,1fr)}
+.lr:hover{background:var(--soft)} .lr.sel{background:var(--soft);box-shadow:inset 3px 0 0 var(--teal)}
+@media (max-width:900px){.lr.lead,.lr.br{grid-template-columns:1fr 1fr}.lr .opt{display:none}}
+.lr .dt{font-weight:700;font-size:13px} .lr small{display:block;color:var(--muted);font-weight:500;font-size:12px}
+.lr .nm{font-weight:700}
+.lr .addr{font-size:12.5px;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden}
+.lhead{display:grid;gap:14px;padding:9px 14px;border-bottom:1px solid var(--line);background:var(--soft)}
+.lhead.br{grid-template-columns:minmax(170px,1.3fr) 140px minmax(150px,1.2fr) 92px 80px 100px minmax(120px,1fr)}
+@media (max-width:900px){.lhead{display:none}}
+.ph{display:inline-block;border:1px solid var(--line);border-radius:8px;padding:4px 8px;font:12.5px var(--mono);white-space:nowrap}
+.ph.tg{color:var(--teal)}
+.st{display:inline-flex;align-items:center;gap:4px;border-radius:999px;padding:3px 10px;font-size:12px;font-weight:700;color:#fff;white-space:nowrap}
+.iz{font-size:12.5px;color:var(--muted);overflow:hidden;text-overflow:ellipsis;white-space:nowrap} .iz.has{color:var(--text)}
+.mini{display:inline-block;font-size:11px;font-weight:700;border-radius:6px;padding:1px 6px;margin-left:4px;vertical-align:1px}
+.x-ok{background:rgba(61,139,95,.14);color:var(--green)} .x-warn{background:rgba(201,130,46,.16);color:var(--orange)}
+.x-bad{background:rgba(194,73,63,.14);color:var(--red)} .x-draft{background:var(--soft);color:var(--muted)}
+.bdot{display:inline-block;width:9px;height:9px;border-radius:50%;margin-right:7px;vertical-align:0}
+.more{padding:12px;text-align:center}
+/* detail */
+.detail{position:sticky;top:76px;max-height:calc(100vh - 92px);overflow:auto}
+.dh{padding:16px 18px;border-bottom:1px solid var(--line);display:flex;gap:10px;align-items:start}
+.dh h3{margin:0;font-size:18px;font-weight:800} .dh .s{color:var(--muted);font-size:12.5px}
+.xbtn{margin-left:auto;background:none;border:0;font-size:20px;color:var(--muted);line-height:1}
+.ds{padding:14px 18px;border-bottom:1px solid var(--line)}
+.ds h4{margin:0 0 10px}
+.empty{padding:40px 20px;text-align:center;color:var(--muted)}
+.sbtns{display:flex;flex-wrap:wrap;gap:6px}
+.sbtn{border:1px solid var(--line);background:var(--card);border-radius:999px;padding:5px 10px;font-size:12.5px;font-weight:600;display:inline-flex;align-items:center;gap:5px}
+.sbtn i{width:8px;height:8px;border-radius:50%} .sbtn.on{color:#fff}
+.acts{display:flex;gap:6px;flex-wrap:wrap}
+.abtn{border:1px solid var(--line);background:var(--card);border-radius:9px;padding:7px 11px;font-size:12.5px;font-weight:600;text-decoration:none;color:var(--text);display:inline-flex;align-items:center;gap:5px}
+.abtn:hover{border-color:var(--teal2)}
+.abtn.pri{background:var(--navy);border-color:var(--navy);color:var(--cream)}
+:root[data-theme="dark"] .abtn.pri{background:var(--teal);border-color:var(--teal);color:#fff}
+.abtn.teal{background:var(--teal);border-color:var(--teal);color:#fff}
+.abtn.danger{color:var(--red);border-color:rgba(194,73,63,.4)}
+.abtn:disabled{opacity:.55}
+textarea.inp{width:100%;min-height:76px;resize:vertical}
+.kv{display:grid;grid-template-columns:140px 1fr;gap:6px 12px;font-size:13px}
+.kv > div:nth-child(odd){color:var(--muted)}
+.photos{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-top:10px}
+.photos a{display:block;border:1px solid var(--line);border-radius:8px;overflow:hidden;font-size:11px;color:var(--muted);text-decoration:none}
+.photos img{width:100%;height:90px;object-fit:cover;display:block;background:var(--soft)}
+.photos span{display:block;padding:3px 6px}
+pre{white-space:pre-wrap;margin:0;font:inherit}
+.hist{display:grid;gap:8px;font-size:12.5px}
+.hist div{border-left:2px solid var(--teal2);padding-left:10px}
+.hist small{color:var(--muted);display:block}
+/* analytics */
+.seg{display:inline-flex;border:1px solid var(--line);border-radius:10px;overflow:hidden;margin-bottom:14px}
+.seg button{border:0;background:var(--card);padding:8px 16px;font-weight:700;color:var(--muted)}
+.seg button.on{background:var(--navy);color:var(--cream)}
+.g2{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:14px}
+@media (max-width:1000px){.g2{grid-template-columns:1fr}}
+.box{border:1px solid var(--line);border-radius:12px;padding:14px;background:var(--card)}
+.box h5{margin:0 0 10px;font-size:14px;font-weight:800}
+.box .hint{font-size:12px;color:var(--muted);margin:-6px 0 10px}
+.ch{position:relative;height:250px}
+.mk{display:grid;grid-template-columns:repeat(6,minmax(0,1fr));gap:12px;margin-bottom:14px}
+@media (max-width:1000px){.mk{grid-template-columns:repeat(3,minmax(0,1fr))}}
+.mk .box .v{font-size:26px;font-weight:900;letter-spacing:-.02em}
+.insights{margin:0;padding-left:18px;display:grid;gap:6px}
+.tbl{width:100%;border-collapse:collapse;font-size:13px}
+.tbl th{text-align:left;font:500 10.5px var(--mono);letter-spacing:.1em;text-transform:uppercase;color:var(--muted);padding:9px 8px;border-bottom:1px solid var(--line);position:sticky;top:0;background:var(--card);white-space:nowrap}
+.tbl td{padding:8px;border-bottom:1px solid var(--line);vertical-align:top}
+.scroll{max-height:460px;overflow:auto;border:1px solid var(--line);border-radius:10px}
+.num{text-align:right;font-variant-numeric:tabular-nums}
+.heat{display:inline-block;min-width:42px;text-align:right;border-radius:6px;padding:1px 6px;font-weight:700}
+/* map */
+#map{height:100%;min-height:640px;border-radius:12px}
+.fmap{display:grid;grid-template-columns:320px minmax(0,1fr);gap:14px;height:calc(100vh - 240px);min-height:640px}
+@media (max-width:900px){.fmap{grid-template-columns:1fr;height:auto}}
+.fside{border:1px solid var(--line);border-radius:12px;overflow:auto}
+.fstats{display:grid;grid-template-columns:repeat(3,1fr);gap:6px;padding:12px;border-bottom:1px solid var(--line)}
+.fstats div{background:var(--soft);border-radius:9px;padding:8px;text-align:center}
+.fstats b{display:block;font-size:20px;font-weight:900} .fstats span{font-size:11.5px;color:var(--muted)}
+.fstats div:nth-child(1) b{color:var(--green)} .fstats div:nth-child(2) b{color:var(--red)}
+.fsec{padding:12px;border-bottom:1px solid var(--line)}
+.fsec h6{margin:0 0 8px} .fsec .inp{width:100%}
+.frow{display:flex;align-items:center;gap:7px;padding:3px 0;cursor:pointer;font-size:13px}
+.fregs{display:grid;gap:2px;max-height:230px;overflow:auto}
+.fregs label{display:grid;grid-template-columns:18px 1fr auto;align-items:center;gap:6px;font-size:13px;cursor:pointer;padding:2px 0}
+.fregs small{color:var(--muted)}
+.lnk{color:var(--teal);cursor:pointer;text-transform:none;letter-spacing:0;font-weight:600;font-family:var(--sans)}
+.fres{margin-top:6px;display:grid;gap:2px;max-height:200px;overflow:auto}
+.fres div{padding:6px 8px;border-radius:7px;cursor:pointer;font-size:12.5px} .fres div:hover{background:var(--soft)}
+.fres small{color:var(--muted);display:block}
+.verd{border-radius:9px;padding:8px 10px;margin-bottom:6px;font-size:12.5px}
+.bpop{font-size:12.5px;line-height:1.5;min-width:230px;font-family:var(--sans)}
+.bpop b.t{font-size:14px} .bpop .r{color:#6b7280}
+.mcl{display:grid;place-items:center;border-radius:50%;color:#fff;font-weight:800;font-size:12px;border:3px solid rgba(255,255,255,.85);box-shadow:0 1px 6px rgba(0,0,0,.25)}
+.distlbl{background:#fff;border:1px solid var(--teal);color:var(--teal);font-weight:700;border-radius:6px;padding:1px 6px;white-space:nowrap}
+.legend{display:flex;gap:14px;flex-wrap:wrap;color:var(--muted);font-size:12px}
+.dot{display:inline-block;width:10px;height:10px;border-radius:50%;margin-right:5px;vertical-align:-1px}
+/* modal */
+.modal{position:fixed;inset:0;background:rgba(10,15,25,.55);display:none;z-index:2500;align-items:start;justify-content:center;padding:30px 12px;overflow:auto}
+.modal.on{display:flex}
+.mbox{background:var(--card);border-radius:16px;width:min(860px,100%);border:1px solid var(--line)}
+.mhead{padding:16px 20px;border-bottom:1px solid var(--line);display:flex;align-items:center;gap:10px}
+.mhead h3{margin:0;font-size:18px;font-weight:800}
+.mbody{padding:16px 20px;display:grid;grid-template-columns:1fr 1fr;gap:12px 14px}
+@media (max-width:700px){.mbody{grid-template-columns:1fr}}
+.mbody label{display:grid;gap:5px;font-size:12.5px;font-weight:600;color:var(--muted)}
+.mbody .full{grid-column:1/-1}
+.mbody label.chk{display:flex;align-items:center;gap:8px;align-self:end;padding:10px 12px}
+.mbody .inp{width:100%;color:var(--text)}
+#mMap{height:250px;border-radius:10px;border:1px solid var(--line)}
+.mfoot{padding:14px 20px;border-top:1px solid var(--line);display:flex;gap:8px;align-items:center}
+.merr{color:var(--red);font-size:13px;font-weight:600}
+.toast{position:fixed;bottom:20px;left:50%;transform:translateX(-50%);background:var(--navy);color:var(--cream);padding:10px 16px;border-radius:9px;z-index:3000;display:none;box-shadow:0 6px 20px rgba(0,0,0,.25)}
+.hidden{display:none!important}
+/* Zonalar (olti burchakli kataklar) */
+.hexi{display:inline-block;width:14px;height:16px;clip-path:polygon(50% 0,100% 25%,100% 75%,50% 100%,0 75%,0 25%);vertical-align:-3px;margin-right:6px}
+.zleg{display:flex;flex-wrap:wrap;gap:8px 20px;font-size:13.5px;padding:2px 4px}
+.mcl2{display:grid;place-items:center;border-radius:50%;background:#fff;color:#131b29;font:800 15px Archivo,sans-serif;box-shadow:0 2px 10px rgba(0,0,0,.25)}
+#map{min-height:600px}
+/* Bosqichlar ko'rsatkichi */
+.stps{display:flex;align-items:flex-start}
+.stp{display:grid;justify-items:center;gap:4px;min-width:62px}
+.stp span{width:30px;height:30px;border-radius:50%;display:grid;place-items:center;font-weight:800;font-size:13px;background:var(--soft);color:var(--muted);border:2px solid var(--line)}
+.stp small{font-size:11.5px;color:var(--muted);font-weight:600}
+.stp.done span{background:var(--green);border-color:var(--green);color:#fff}
+.stp.cur span{background:var(--navy);border-color:var(--navy);color:var(--cream);box-shadow:0 0 0 4px rgba(74,127,153,.25)}
+.stp.cur small{color:var(--text)}
+.stp.bad span{background:var(--red);border-color:var(--red);color:#fff}
+.stl{flex:1;height:2px;background:var(--line);margin-top:15px}
+/* Arizalar: ko'rinishlar va yangi arizalar */
+.views{display:flex;flex-wrap:wrap;gap:8px;padding:0 14px 12px;align-items:center}
+.view{display:inline-flex;align-items:center;gap:8px;border:1px solid var(--line);background:var(--card);border-radius:10px;padding:8px 12px;font-weight:700;font-size:13px}
+.view b{font-weight:900;background:var(--soft);border-radius:7px;padding:1px 7px;font-size:12px}
+.view:hover{border-color:var(--teal2)}
+.view.on{background:var(--navy);border-color:var(--navy);color:var(--cream)} .view.on b{background:rgba(255,255,255,.15)}
+.view.vnew b{background:#e5484d;color:#fff}
+.lr.lead.new{background:linear-gradient(90deg,rgba(74,127,153,.13),rgba(74,127,153,.03) 60%);box-shadow:inset 4px 0 0 var(--teal)}
+.lr.lead.new .nm{font-weight:900}
+.newb{display:inline-block;background:#e5484d;color:#fff;font:800 10px var(--mono);letter-spacing:.08em;border-radius:5px;padding:2px 6px;margin-right:6px;vertical-align:2px}
+.lsep{position:sticky;top:0;z-index:2;background:var(--soft);padding:6px 14px;font:600 11px var(--mono);letter-spacing:.12em;text-transform:uppercase;color:var(--muted);border-bottom:1px solid var(--line)}
+.lsep b{color:var(--text)}
+/* Xaritadagi bo'sh hudud belgisi — yorqin binafsha, raqamli */
+.gmark{min-width:34px;height:24px;padding:0 5px;border-radius:7px;background:#fb923c;color:#3b1a03;font:800 12px Archivo,sans-serif;display:grid;place-items:center;
+  border:2px solid #fff;box-shadow:0 0 0 2px #ea580c,0 2px 8px rgba(0,0,0,.3)}
+/* Xaritadagi ariza belgisi — yorqin sariq, miltillaydi */
+.lmark{position:relative;width:20px;height:20px}
+.ldot{position:absolute;inset:4px;border-radius:50%;background:#ffd60a;border:2px solid #131b29;box-shadow:0 0 0 2px #fff,0 2px 8px rgba(0,0,0,.35)}
+.lpulse{position:absolute;inset:0;border-radius:50%;background:rgba(255,214,10,.55);animation:lpulse 1.6s ease-out infinite}
+@keyframes lpulse{0%{transform:scale(.6);opacity:1}100%{transform:scale(2.2);opacity:0}}
+/* ===== Bo'sh hududlar (sodda ko'rinish) ===== */
+.gintro{border:1px solid var(--line);border-radius:14px;padding:18px 20px;background:var(--card)}
+.gintro h5{font-size:19px;font-weight:800;margin:6px 0 14px}
+.gsteps{display:flex;align-items:stretch;gap:10px;flex-wrap:wrap}
+.gsteps > div{flex:1;min-width:190px;background:var(--soft);border-radius:12px;padding:12px 14px;display:grid;gap:2px}
+.gsteps > div.ok{background:var(--navy);color:var(--cream)} .gsteps > div.ok span{color:#aab6c8}
+.gsteps i{font-style:normal;font-size:22px} .gsteps b{font-size:15px} .gsteps span{font-size:13px;color:var(--muted)}
+.gsteps .arr{flex:0 0 auto;min-width:0;background:none;display:grid;place-items:center;font-size:22px;font-weight:900;color:var(--muted);padding:0}
+.gnote{margin-top:12px;font-size:13px;color:var(--muted)}
+.gcards{display:grid;grid-template-columns:repeat(auto-fill,minmax(330px,1fr));gap:14px}
+.gcard{border:1px solid var(--line);border-radius:14px;padding:14px 16px;background:var(--card)}
+.gtop{display:flex;gap:12px;align-items:center;margin-bottom:10px}
+.grank{flex:none;width:34px;height:34px;border-radius:10px;background:var(--navy);color:var(--cream);display:grid;place-items:center;font-weight:900}
+.gname{font-weight:800;font-size:15.5px;line-height:1.25} .ghud{font-size:12.5px;color:var(--muted)}
+.gbig{font-size:18px;font-weight:900} .gbig span{font-size:13px;font-weight:500;color:var(--muted)}
+.gbar{height:8px;background:var(--soft);border-radius:9px;overflow:hidden;margin:6px 0 10px}
+.gbar span{display:block;height:100%;border-radius:9px;background:linear-gradient(90deg,var(--navy),var(--teal))}
+.grow{font-size:13px;margin-top:4px}
+
+
+</style>
+</head>
+<body>
+<header class="top">
+  <svg width="40" height="40" viewBox="0 0 48 48" aria-hidden="true"><rect width="48" height="48" rx="12" fill="#1f2a3d"/><path d="M15 30a9.5 9.5 0 0 1 18 0" fill="none" stroke="#efebe1" stroke-width="3.4" stroke-linecap="round"/><circle cx="15" cy="30" r="3.6" fill="#efebe1"/><circle cx="15" cy="30" r="1.4" fill="#1f2a3d"/><circle cx="33" cy="30" r="4.2" fill="#4a7f99"/><circle cx="33" cy="30" r="1.6" fill="#1f2a3d"/></svg>
+  <div><div class="word">YETKAZ</div><div class="mono">Express · Infrastructure</div></div>
+  <div class="sep"></div>
+  <div><div style="font-weight:800;font-size:15px">Filiallar boshqaruvi</div><div class="mono" id="sub">Tarmoq · arizalar · tahlil</div></div>
+  <div class="sp"></div>
+  <div class="live"><i></i><span id="live">—</span></div>
+  <button class="tbtn" id="reload">↻ Yangilash</button>
+  <a class="tbtn" href="/export.xlsx">⬇ Arizalar Excel</a>
+  <button class="tbtn" id="theme" title="Tungi / kunduzgi rejim">◐</button>
+</header>
+
+<main>
+  <section class="kpis" id="kpis"></section>
+
+  <section class="card">
+    <div class="tabs" id="tabs">
+      <button class="tab on" data-p="filiallar"><span class="ti"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 21h18"/><path d="M5 21V8l7-5 7 5v13"/><path d="M9 21v-6h6v6"/></svg></span><span class="tt"><small>01</small>Filiallar</span><em id="tc-filiallar">tarmoqni boshqarish</em></button>
+      <button class="tab" data-p="xarita"><span class="ti"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 4 3 6v14l6-2 6 2 6-2V4l-6 2-6-2z"/><path d="M9 4v14M15 6v14"/></svg></span><span class="tt"><small>02</small>Xarita</span><em id="tc-xarita">filiallar va arizalar</em></button>
+      <button class="tab" data-p="arizalar"><span class="ti"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 3H6a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V9z"/><path d="M14 3v6h6M8 13h8M8 17h5"/></svg></span><span class="tt"><small>03</small>Arizalar</span><em id="tc-arizalar">Telegram botdan</em></button>
+      <button class="tab" data-p="gaps"><span class="ti"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="8" stroke-dasharray="3 3"/><path d="M12 8v8M8 12h8"/></svg></span><span class="tt"><small>04</small>Bo'sh hududlar</span><em id="tc-gaps">yangi filial uchun joylar</em></button>
+      <button class="tab" data-p="tahlil"><span class="ti"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 20V10M10 20V4M16 20v-7M22 20H2"/></svg></span><span class="tt"><small>05</small>Tahlil</span><em id="tc-tahlil">tarmoq va arizalar</em></button>
+    </div>
+    <div class="pane on" id="p-filiallar"><div class="vgrid" id="bgrid"></div></div>
+    <div class="pane" id="p-arizalar"><div class="vgrid" id="vgrid"></div></div>
+    <div class="pane" id="p-gaps"></div>
+    <div class="pane" id="p-tahlil">
+      <div class="seg"><button class="on" data-s="tarmoq">Tarmoq</button><button data-s="arizalar">Arizalar</button></div>
+      <div id="tahlilBody"></div>
+    </div>
+    <div class="pane" id="p-xarita">
+      <div class="fmap">
+        <aside class="fside">
+          <div class="fstats"><div><b id="fsAct">–</b><span>Aktiv</span></div><div><b id="fsCl">–</b><span>Yopilgan</span></div><div><b id="fsAll">–</b><span>Ko'rsatilgan</span></div></div>
+          <div class="fsec"><h6 class="mono">Qidirish</h6><input class="inp" id="fq" placeholder="Nomi, manzil, menejer, telefon..."><div id="fqRes" class="fres"></div></div>
+          <div class="fsec"><h6 class="mono">Holati</h6>
+            <label class="frow"><input type="checkbox" id="fAct" checked><i class="dot" style="background:#1e9e50"></i>Aktiv</label>
+            <label class="frow"><input type="checkbox" id="fCl" checked><i class="dot" style="background:#d92d2d"></i>Yopilgan</label>
+            <div style="display:flex;gap:6px;margin-top:6px">
+              <select class="inp" id="fExtra" style="flex:1"><option value="">Hammasi</option><option value="ijara">Ijarada</option><option value="banner">Banner bor</option><option value="nobanner">Banner yo'q</option><option value="izoh">Izohi bor</option></select>
+            </div></div>
+          <div class="fsec"><h6 class="mono">Hudud · <span class="lnk" id="fRegAll">Barchasi</span> · <span class="lnk" id="fRegNone">Hech biri</span></h6><div id="fRegs" class="fregs"></div></div>
+          <div class="fsec"><h6 class="mono">Qatlamlar</h6>
+            <label class="frow"><input type="checkbox" id="lyZones" checked><i class="hexi" style="background:#b18cff"></i>Zonalar <span style="color:var(--muted);font-size:11.5px">(tavsiya / mumkin emas)</span></label>
+            <label class="frow"><input type="checkbox" id="lyLeads" checked><i class="dot" style="background:#ffd60a;border:2px solid #131b29;width:12px;height:12px"></i>Arizalar</label>
+            <label class="frow"><input type="checkbox" id="lyGaps"><i class="dot" style="background:#fb923c;border:2px solid #fff;box-shadow:0 0 0 1px #ea580c;width:12px;height:12px;border-radius:4px"></i>Bo'sh hududlar <span style="color:var(--muted);font-size:11.5px">(#raqam — ro'yxatdagi o'rni)</span></label>
+            <label class="frow"><input type="checkbox" id="lyCover"><i class="dot" style="background:rgba(61,139,95,.25)"></i>3 km qamrov</label>
+            <label class="frow"><input type="checkbox" id="lyCluster" checked>Filiallarni guruhlash</label></div>
+          <div class="fsec"><h6 class="mono">Masofa o'lchash</h6><div class="small" style="color:var(--muted);font-size:12px">Yoqing, so'ng ikkita filialni ketma-ket bosing.</div>
+            <div style="display:flex;gap:6px;margin-top:6px"><button class="abtn" id="fDist">O'lchashni yoqish</button><button class="abtn hidden" id="fDistClr">Tozalash</button></div>
+            <div id="fDistRes" style="margin-top:6px;font-size:12.5px"></div></div>
+          <div class="fsec" style="border:0"><h6 class="mono">Yangi joyni baholash</h6><div style="color:var(--muted);font-size:12px">Xaritadan nuqta belgilang, koordinata yoki Google Maps havolasini kiriting.</div>
+            <button class="abtn" id="fPick" style="margin-top:6px">📍 Xaritadan belgilash</button>
+            <div style="display:flex;gap:6px;margin-top:6px"><input class="inp" id="fLL" placeholder="41.2995, 69.2401 yoki havola" style="flex:1;min-width:0"><button class="abtn" id="fLLgo">Tekshirish</button></div>
+            <div id="fEval" style="margin-top:8px"></div></div>
+        </aside>
+        <div style="min-width:0;display:grid;grid-template-rows:1fr auto;gap:8px"><div id="map"></div>
+          <div class="zleg"><span><i class="hexi" style="background:#a77bff"></i><b>Tavsiya etilgan zona</b> — aholi juda gavjum, 2 km ichida filial yo'q</span>
+            <span><i class="hexi" style="background:#9a9ca3"></i><b>Filial ochib bo'lmaydi</b> — 2 km ichida filial bor (siyrak joyda 5 km)</span>
+            <span id="zHint" style="color:var(--muted)"></span></div></div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Filiallar boshqaruvi -->
+  <section class="work" id="workB">
+    <div class="card">
+      <div class="filters">
+        <button class="abtn pri" id="bAdd">＋ Yangi filial</button>
+        <input class="inp grow" id="bq" placeholder="Qidiruv: nomi, kod, menejer, telefon, manzil, izoh...">
+        <select class="inp" id="bh"><option value="">Barcha hududlar</option></select>
+        <select class="inp" id="bsort"><option value="nomi">Nomi bo'yicha</option><option value="new">Yangi ochilgan avval</option><option value="aholi">Aholi (3 km) ko'p</option><option value="qoshni">Qo'shni filial yaqin</option></select>
+        <a class="abtn" id="bCsv">⬇ CSV</a>
+      </div>
+      <div class="chips" id="bchips"></div>
+      <div class="lhead br mono"><div>Filial</div><div>Hudud</div><div>Menejer</div><div>Ochilgan</div><div>Ijara · B</div><div>Aholi 3 km</div><div>Izoh</div></div>
+      <div class="rows" id="brows"></div>
+    </div>
+    <aside class="card detail" id="bdetail"></aside>
+  </section>
+
+  <!-- Arizalar -->
+  <section class="work hidden" id="work">
+    <div class="card">
+      <div class="filters">
+        <input class="inp grow" id="q" placeholder="Qidiruv: ism, telefon, manzil, tuman, izoh...">
+        <select class="inp" id="fv"><option value="">Barcha viloyatlar</option></select>
+        <select class="inp" id="fd">
+          <option value="">📅 Barcha sanalar</option><option value="bugun">Bugun</option><option value="kecha">Kecha</option>
+          <option value="7">Oxirgi 7 kun</option><option value="30">Oxirgi 30 kun</option><option value="oy">Shu oy</option><option value="oraliq">Oraliq...</option>
+        </select>
+        <span id="fdRange" class="hidden" style="display:inline-flex;gap:6px;align-items:center">
+          <input type="date" class="inp" id="fd1"><span style="color:var(--muted)">—</span><input type="date" class="inp" id="fd2"></span>
+        <select class="inp" id="sort">
+          <option value="new">Yangi avval</option><option value="old">Eski avval</option>
+          <option value="score">Ball bo'yicha</option><option value="aloqa">Aloqa sanasi</option>
+        </select>
+        <label class="chk"><input type="checkbox" id="hideDubl"> Dubl yashir</label>
+        <label class="chk"><input type="checkbox" id="onlyPhone"> Telefonli</label>
+      </div>
+      <div class="views" id="views"></div>
+      <div class="chips" id="chips"></div>
+      <div class="rows" id="rows"></div>
+    </div>
+    <aside class="card detail" id="detail"></aside>
+  </section>
+</main>
+
+<div class="modal" id="modal"><div class="mbox">
+  <div class="mhead"><h3 id="mTitle">Yangi filial</h3><span class="mono" id="mSub"></span><button class="xbtn" id="mClose">×</button></div>
+  <div class="mbody">
+    <label>Filial nomi *<input class="inp" id="m_nomi" placeholder="Masalan: Vobkent 2"></label>
+    <label>Kod (MRK)<input class="inp" id="m_mrk" placeholder="VOBK2"></label>
+    <label>Hudud<input class="inp" id="m_hudud" list="hududList"><datalist id="hududList"></datalist></label>
+    <label>Holati<select class="inp" id="m_status"><option>Aktiv</option><option>Yopilgan</option></select></label>
+    <label class="full">Menejer<input class="inp" id="m_manager"></label>
+    <label>Telefon 1<input class="inp" id="m_phone1" placeholder="901234567"></label>
+    <label>Telefon 2<input class="inp" id="m_phone2"></label>
+    <label class="full">Manzil<input class="inp" id="m_address" placeholder="Viloyat, tuman, MFY, ko'cha, uy"></label>
+    <label class="full">Mo'ljal<input class="inp" id="m_landmark"></label>
+    <label>Ochilgan sana<input type="date" class="inp" id="m_ochilgan"></label>
+    <label>Yopilgan sana<input type="date" class="inp" id="m_yopilgan_sana"></label>
+    <label class="chk" style="color:var(--text)"><input type="checkbox" id="m_ijara"> Ijarada</label>
+    <label class="chk" style="color:var(--text)"><input type="checkbox" id="m_banner"> Banner bor</label>
+    <label class="full">Lokatsiya havolasi (Google Maps)
+      <div style="display:flex;gap:6px"><input class="inp" id="m_locationUrl" style="flex:1"><button class="abtn" type="button" id="mUrl">Koordinatani olish</button></div></label>
+    <label>Lat (kenglik)<input class="inp" id="m_lat"></label>
+    <label>Lng (uzunlik)<input class="inp" id="m_lng"></label>
+    <div class="full"><div class="mono" style="margin-bottom:6px">Xaritadan bosib belgilang</div><div id="mMap"></div><div id="mNear" style="font-size:12.5px;margin-top:6px;color:var(--muted)"></div></div>
+    <label class="full">Izoh<textarea class="inp" id="m_izoh"></textarea></label>
+  </div>
+  <div class="mfoot"><button class="abtn danger hidden" id="mDel">🗑 O'chirish</button><span class="merr" id="mErr"></span><div style="flex:1"></div>
+    <button class="abtn" id="mCancel">Bekor qilish</button><button class="abtn pri" id="mSave">Saqlash</button></div>
+</div></div>
+<div class="toast" id="toast"></div>
+
+<script>
+const $ = s => document.querySelector(s);
+const esc = s => String(s ?? "").replace(/[&<>"']/g, c => ({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
+const cssv = n => getComputedStyle(document.documentElement).getPropertyValue(n).trim();
+const S = {L:null, N:null, tab:"filiallar", status:"", kpi:"", vil:"", sel:null, limit:150, charts:{}, dirty:false,
+           bsel:null, bchip:"", bhud:"", blimit:200, seg:"tarmoq", gapHud:""};
+const pad = n => String(n).padStart(2,"0");
+const ymd = d => `${d.getFullYear()}-${pad(d.getMonth()+1)}-${pad(d.getDate())}`;
+const TODAY = () => ymd(new Date());
+const daysAgo = n => { const d = new Date(); d.setDate(d.getDate()-n); return ymd(d); };
+const fmtDate = s => s ? `${s.slice(8,10)}.${s.slice(5,7)}.${s.slice(0,4)}` : "";
+const isDraft = l => l.holat.startsWith("⏳");
+const xcls = l => isDraft(l) ? "draft" : l.xulosa.startsWith("✅") ? "ok" : l.xulosa.startsWith("⚠") ? "warn" : l.xulosa.startsWith("❌") ? "bad" : "draft";
+const xshort = l => ({ok:"✅ Ma'qul", warn:"⚠️ Ko'rib", bad:"❌ Mos emas", draft: isDraft(l) ? "⏳ Chala" : "—"})[xcls(l)];
+const stColor = k => cssv("--" + ((S.L?.statuses||[]).find(s=>s.k===k)?.c || "gray"));
+const FINAL = new Set(["Shartnoma","Mos emas","Dubl"]);
+const isAct = b => b.status === "Aktiv";
+function toast(t){const el=$("#toast");el.textContent=t;el.style.display="block";clearTimeout(el._t);el._t=setTimeout(()=>el.style.display="none",3000)}
+function hav(a,b,c,d){ const r=6371, p1=a*Math.PI/180, p2=c*Math.PI/180, dp=p2-p1, dl=(d-b)*Math.PI/180;
+  const x=Math.sin(dp/2)**2+Math.cos(p1)*Math.cos(p2)*Math.sin(dl/2)**2; return 2*r*Math.asin(Math.sqrt(x)); }
+const countBy = (arr, f) => { const c = {}; arr.forEach(x => { const k = f(x); if (k!==undefined && k!==null && k!=="") c[k]=(c[k]||0)+1; }); return Object.entries(c).sort((a,b)=>b[1]-a[1]); };
+
+/* ---------- theme ---------- */
+try { const t = localStorage.getItem("theme"); if (t) document.documentElement.dataset.theme = t; } catch(e){}
+$("#theme").onclick = () => {
+  const cur = document.documentElement.dataset.theme || (matchMedia("(prefers-color-scheme: dark)").matches ? "dark" : "light");
+  const nx = cur === "dark" ? "light" : "dark"; document.documentElement.dataset.theme = nx;
+  try { localStorage.setItem("theme", nx); } catch(e){}
+  renderAll(); if (map) renderMap();
+};
+
+/* ---------- data ---------- */
+async function load(network=false){
+  const [a, b] = await Promise.all([fetch("/api/leads"), (network || !S.N) ? fetch("/api/network") : null]);
+  if (a.status === 401) { location.href = "/login"; return; }
+  S.L = await a.json();
+  if (b) { const n = await b.json(); S.N = n.error ? null : n; if (map) mapDirty = true; }
+  const now = new Date(); $("#live").textContent = `Yangilandi ${pad(now.getHours())}:${pad(now.getMinutes())}`;
+  fillSelects(); renderAll();
+}
+function fillSelects(){
+  const vils = [...new Set(S.L.leads.map(l=>l.viloyat))].filter(v=>v && v!=="-").sort();
+  const fv = $("#fv"), cur = fv.value;
+  fv.innerHTML = '<option value="">Barcha viloyatlar</option>' + vils.map(v=>`<option>${esc(v)}</option>`).join(""); fv.value = cur;
+  if (S.N) {
+    const hs = [...new Set(S.N.branches.map(b=>b.hudud).filter(Boolean))].sort();
+    const bh = $("#bh"), c1 = bh.value;
+    bh.innerHTML = '<option value="">Barcha hududlar</option>' + hs.map(h=>`<option>${esc(h)}</option>`).join(""); bh.value = c1;
+    $("#hududList").innerHTML = hs.map(h=>`<option value="${esc(h)}">`).join("");
+  }
+}
+function renderTabCounts(){
+  const B = S.N?.branches || [], L = S.L.leads, act = B.filter(isAct).length, t = TODAY();
+  const set = (k, v) => { const el = document.getElementById("tc-" + k); if (el) el.textContent = v; };
+  set("filiallar", `${act} aktiv · ${B.length - act} yopilgan`);
+  set("xarita", `${B.filter(b=>b.lat).length} filial · ${L.filter(l=>l.lat).length} ariza`);
+  const nNew = L.filter(l => !isDraft(l) && !l.korildi).length;
+  set("arizalar", nNew ? `🆕 ${nNew} yangi · jami ${L.length}` : `${L.length} ta · bugun ${L.filter(l=>l.created.slice(0,10)===t).length}`);
+  set("gaps", `${S.N?.gaps.length ?? 0} ta istiqbolli joy`);
+  set("tahlil", "tarmoq va arizalar");
+}
+function renderAll(){
+  renderKpis(); renderTabCounts();
+  if (S.N) { renderBGrid(); renderBChips(); renderBRows(); renderBDetail(); }
+  renderVil(); renderViews(); renderChips(); renderRows(); if (!S.dirty) renderDetail();
+  if (S.tab === "tahlil") renderTahlil();
+  if (S.tab === "gaps") renderGaps();
+  if (S.tab === "xarita" && mapDirty) renderMap();
+}
+
+/* ---------- KPI ---------- */
+function kpiDefs(){
+  const L = S.L.leads, t = TODAY(), w = daysAgo(6), B = S.N?.branches || [], s = S.N?.summary || {};
+  const month = t.slice(0,7);
+  const aloqa = L.filter(l => l.aloqa_sana && l.aloqa_sana <= t && !FINAL.has(l.status));
+  const okWait = L.filter(l => !isDraft(l) && l.xulosa.startsWith("✅") && !l.bosqich).length;
+  return [
+    ["b-act","Aktiv filial", B.filter(isAct).length, `jami ${B.length}`, "--green", "filiallar", true],
+    ["b-cl","Yopilgan", B.filter(b=>!isAct(b)).length, B.length?`${Math.round(B.filter(b=>!isAct(b)).length/B.length*100)}% tarmoqdan`:"", "--red", "filiallar"],
+    ["b-month","Shu oy ochilgan", B.filter(b=>(b.ochilgan||"").startsWith(month)).length, ["yanvar","fevral","mart","aprel","may","iyun","iyul","avgust","sentabr","oktabr","noyabr","dekabr"][new Date().getMonth()], "--teal", "filiallar"],
+    ["gaps","Aholi qamrovi", s.qamrov_foiz!=null?s.qamrov_foiz+"%":"—", s.qamrov_mln!=null?`${s.qamrov_mln} / ${s.aholi_jami_mln} mln · 3 km`:"", "--blue", "gaps"],
+    ["l-week","Yangi arizalar", L.filter(l=>l.created.slice(0,10)>=w).length, `7 kun · ${L.filter(l=>!isDraft(l) && !l.korildi).length} ta ko'rilmagan`, "--cyan", "arizalar"],
+    ["l-ok","Ma'qul arizalar", L.filter(l=>!isDraft(l) && l.xulosa.startsWith("✅")).length, `taklif kutmoqda ${okWait}`, "--purple", "arizalar"],
+    ["l-call","Bugun aloqa", aloqa.length, `kechikkan ${aloqa.filter(l=>l.aloqa_sana<t).length}`, "--orange", "arizalar"],
+  ];
+}
+const KF = {
+  "b-act": b => isAct(b), "b-cl": b => !isAct(b), "b-month": b => (b.ochilgan||"").startsWith(TODAY().slice(0,7)),
+  "l-week": l => l.created.slice(0,10) >= daysAgo(6), "l-ok": l => !isDraft(l) && l.xulosa.startsWith("✅"),
+  "l-call": l => l.aloqa_sana && l.aloqa_sana <= TODAY() && !FINAL.has(l.status),
+};
+function renderKpis(){
+  $("#kpis").innerHTML = kpiDefs().map(([k,t,v,s,c,tab,dark]) => `<div class="card kpi ${dark?"dark":""} ${S.kpi===k?"on":""}" data-k="${k}" data-t="${tab}">
+    <i class="d" style="background:var(${c})"></i><div class="mono">${t}</div><div class="v">${v}</div><div class="s">${esc(s)}</div></div>`).join("");
+  document.querySelectorAll(".kpi").forEach(el => el.onclick = () => {
+    const k = el.dataset.k; S.kpi = S.kpi === k ? "" : (k === "gaps" ? "" : k);
+    if (k.startsWith("b-")) { S.bchip = ""; S.blimit = 200; }
+    if (k.startsWith("l-")) { S.status = ""; S.view = ""; }
+    setTab(el.dataset.t); renderKpis();
+  });
+}
+
+/* ---------- FILIALLAR (boshqaruv) ---------- */
+function renderBGrid(){
+  const by = {}; S.N.branches.forEach(b => { const h=b.hudud||"—"; (by[h] ||= {a:0,n:0}); by[h].n++; if (isAct(b)) by[h].a++; });
+  const rows = Object.entries(by).sort((a,b)=>b[1].a-a[1].a), max = Math.max(1,...rows.map(r=>r[1].a));
+  $("#bgrid").innerHTML = rows.map(([h,c]) => `<div class="vrow ${S.bhud===h?"on":""}" data-h="${esc(h)}" title="${c.a} aktiv / ${c.n} jami"><div>${esc(h.replace(" Respublikasi",""))}</div>
+    <div class="track"><span style="width:${c.a/max*100}%"></span></div><b>${c.a}</b></div>`).join("");
+  document.querySelectorAll("#bgrid .vrow").forEach(el => el.onclick = () => { S.bhud = S.bhud===el.dataset.h ? "" : el.dataset.h; $("#bh").value = S.bhud; renderBGrid(); renderBChips(); renderBRows(); });
+}
+const BCHIPS = [
+  ["", "Barchasi", b=>true, null], ["Aktiv","Aktiv", isAct, "--green"], ["Yopilgan","Yopilgan", b=>!isAct(b), "--red"],
+  ["ijara","Ijarada", b=>b.ijara==="Bor", "--teal"], ["nobanner","Banner yo'q", b=>isAct(b) && b.banner!=="Bor", "--orange"],
+  ["izoh","Izohli", b=>!!b.izoh, "--purple"],
+  ["yaqin","1 km da qo'shni", b=>isAct(b) && b.qoshni_km!=null && b.qoshni_km<1, "--red"],
+  ["kam","Aholi kam", b=>isAct(b) && b.zichlik!=null && b.zichlik<300, "--gray"],
+];
+function bBase(){
+  const q = $("#bq").value.toLowerCase().trim(), h = $("#bh").value;
+  const kf = S.kpi && S.kpi.startsWith("b-") ? KF[S.kpi] : null;
+  return S.N.branches.filter(b => (!kf || kf(b)) && (!h || b.hudud===h)
+    && (!q || [b.nomi,b.mrk,b.manager,b.phone1,b.phone2,b.address,b.landmark,b.izoh,b.hudud].join(" ").toLowerCase().includes(q)));
+}
+function renderBChips(){
+  const base = bBase();
+  $("#bchips").innerHTML = BCHIPS.map(([k,t,f,c]) => `<button class="chip ${S.bchip===k?"on":""}" data-k="${k}">${c?`<i style="background:var(${c})"></i>`:""}${t} <b>${base.filter(f).length}</b></button>`).join("");
+  document.querySelectorAll("#bchips .chip").forEach(el => el.onclick = () => { S.bchip = el.dataset.k; renderBChips(); renderBRows(); });
+}
+function bListed(){
+  const f = BCHIPS.find(c=>c[0]===S.bchip)[2]; let rows = bBase().filter(f);
+  const s = $("#bsort").value;
+  const cmp = {nomi:(a,b)=>(a.hudud||"").localeCompare(b.hudud||"") || (a.nomi||"").localeCompare(b.nomi||"", "uz", {numeric:true}),
+    new:(a,b)=>(b.ochilgan||"").localeCompare(a.ochilgan||""), aholi:(a,b)=>(b.aholi_3km||0)-(a.aholi_3km||0),
+    qoshni:(a,b)=>(a.qoshni_km??999)-(b.qoshni_km??999)}[s];
+  return rows.sort(cmp);
+}
+function renderBRows(){
+  const rows = bListed(), show = rows.slice(0, S.blimit);
+  $("#brows").innerHTML = show.map(b => `<div class="lr br ${String(S.bsel)===String(b.id)?"sel":""}" data-id="${esc(b.id)}">
+    <div class="nm"><span class="bdot" style="background:var(${isAct(b)?"--green":"--red"})"></span>${esc(b.nomi)}<small>${esc(b.mrk||"")}${b.status!=="Aktiv"?` · yopilgan${b.yopilgan_sana?" "+fmtDate(b.yopilgan_sana):""}`:""}</small></div>
+    <div>${esc(b.hudud||"")}</div>
+    <div class="opt">${esc(b.manager||"—")}<small>${esc(b.phone1||"")}</small></div>
+    <div class="opt" style="font-size:12.5px">${fmtDate(b.ochilgan)||"—"}</div>
+    <div class="opt">${b.ijara==="Bor"?'<span class="mini x-ok" style="margin:0">ijara</span>':""} ${b.banner==="Bor"?'<span class="mini x-draft" style="margin:0">banner</span>':""}</div>
+    <div class="opt num" style="text-align:left">${b.aholi_3km!=null?(b.aholi_3km/1000).toFixed(0)+" ming":"—"}${b.qoshni_km!=null&&b.qoshni_km<1&&isAct(b)?`<small style="color:var(--red)">qo'shni ${Math.round(b.qoshni_km*1000)} m</small>`:""}</div>
+    <div class="iz opt ${b.izoh?"has":""}">${esc(b.izoh||"—")}</div></div>`).join("")
+    + (rows.length > S.blimit ? `<div class="more"><button class="abtn" id="bMore">Yana ko'rsatish (${rows.length - S.blimit})</button></div>` : "")
+    || '<div class="empty">Filial topilmadi</div>';
+  document.querySelectorAll("#brows .lr").forEach(el => el.onclick = () => { S.bsel = el.dataset.id; renderBRows(); renderBDetail(); });
+  const mb = $("#bMore"); if (mb) mb.onclick = () => { S.blimit += 300; renderBRows(); };
+}
+async function renderBDetail(){
+  const b = S.N.branches.find(x=>String(x.id)===String(S.bsel));
+  if (!b) {
+    const s = S.N.summary;
+    $("#bdetail").innerHTML = `<div class="dh"><div><div class="mono">Filial tanlang</div><h3>Tarmoq holati</h3></div></div>
+      <div class="ds"><div class="kv">${[["Jami filiallar", s.jami],["Aktiv", s.aktiv],["Yopilgan", s.yopilgan],["Ijarada (aktiv)", s.ijara],["Banner bor (aktiv)", s.banner],
+        ["Aholi qamrovi", `${s.qamrov_foiz}% (${s.cover_km} km)`],["Koordinatasiz", s.koordinatasiz],["Ma'lumot muammosi", S.N.sifat.length]].map(([a,v])=>`<div>${a}</div><div><b>${v}</b></div>`).join("")}</div></div>
+      <div class="ds" style="border:0"><h4 class="mono">So'nggi o'zgarishlar</h4><div class="hist" id="histAll"><span style="color:var(--muted)">Yuklanmoqda...</span></div></div>`;
+    const h = await (await fetch("/api/tarix")).json();
+    $("#histAll").innerHTML = h.slice(0,15).map(histRow).join("") || '<span style="color:var(--muted)">Hali o\'zgarish yo\'q. Filial qo\'shsangiz yoki tahrirlasangiz shu yerda chiqadi.</span>';
+    return;
+  }
+  const kv = rows => rows.filter(r=>r[1]!==undefined&&r[1]!==null&&r[1]!=="").map(([a,v])=>`<div>${esc(a)}</div><div>${v}</div>`).join("");
+  const leads = b.lat ? S.L.leads.filter(l=>l.lat).map(l=>({l, km:hav(b.lat,b.lng,l.lat,l.lon)})).filter(x=>x.km<=5).sort((x,y)=>x.km-y.km) : [];
+  const tel = p => p ? `<a href="tel:+998${esc(String(p).replace(/\D/g,"").slice(-9))}">${esc(p)}</a>` : "";
+  $("#bdetail").innerHTML = `
+    <div class="dh"><div><div class="mono">${esc(b.mrk||"filial")} · №${esc(b.num||"")}</div><h3>${esc(b.nomi)}</h3><div class="s">${esc(b.hudud||"")}</div>
+      <div style="margin-top:8px;display:flex;gap:6px;flex-wrap:wrap"><span class="st" style="background:var(${isAct(b)?"--green":"--red"})">${esc(b.status)}</span>
+      ${b.ijara==="Bor"?'<span class="mini x-ok" style="margin:0">ijarada</span>':""}${b.banner==="Bor"?'<span class="mini x-draft" style="margin:0">banner bor</span>':'<span class="mini x-warn" style="margin:0">banner yo\'q</span>'}</div></div>
+      <button class="xbtn" id="bClose">×</button></div>
+    <div class="ds"><div class="acts"><button class="abtn pri" id="bEdit">✏️ Tahrirlash</button>
+      <button class="abtn ${isAct(b)?"danger":"teal"}" id="bToggle">${isAct(b)?"⏻ Yopish":"↺ Qayta ochish"}</button>
+      ${b.lat?`<button class="abtn" id="bMap">📍 Xaritada</button><a class="abtn" target="_blank" href="https://maps.google.com/?q=${b.lat},${b.lng}">Google ↗</a>`:""}
+      ${b.phone1?`<a class="abtn" href="tel:+998${esc(String(b.phone1).replace(/\D/g,"").slice(-9))}">📞</a>`:""}</div></div>
+    <div class="ds"><h4 class="mono">Ma'lumotlar</h4><div class="kv">${kv([
+      ["Manzil", esc(b.address)], ["Mo'ljal", esc(b.landmark)], ["Menejer", esc(b.manager)], ["Telefon", [tel(b.phone1), tel(b.phone2)].filter(Boolean).join(", ")],
+      ["Ochilgan", fmtDate(b.ochilgan)], ["Yopilgan", fmtDate(b.yopilgan_sana)],
+      ["Izoh", esc(b.izoh)], ["Koordinata", b.lat?`${b.lat.toFixed(5)}, ${b.lng.toFixed(5)}`:'<span style="color:var(--red)">yo\'q</span>']])}</div></div>
+    <div class="ds"><h4 class="mono">Joylashuv tahlili</h4><div class="kv">${kv([
+      ["Aholi (3 km)", b.aholi_3km!=null?(b.aholi_3km/1000).toFixed(0)+" ming kishi":""], ["Zichlik", b.zichlik!=null?b.zichlik+" kishi/km²":""],
+      ["Eng yaqin aktiv", b.qoshni?`${esc(b.qoshni)} — <b>${b.qoshni_km} km</b>${b.qoshni_km<1?' <span class="mini x-bad">juda yaqin</span>':""}`:""]])}</div></div>
+    <div class="ds"><h4 class="mono">Atrofidagi arizalar (5 km)</h4>${leads.length ? leads.map(x=>`<div style="margin:3px 0"><a href="#" data-lead="${x.l.id}">${esc(x.l.name)}</a> <span class="mini x-${xcls(x.l)}">${xshort(x.l)}</span> <span style="color:var(--muted);font-size:12px">${x.km.toFixed(1)} km · ${esc(x.l.status)}</span></div>`).join("") : '<span style="color:var(--muted)">Yo\'q</span>'}</div>
+    <div class="ds" style="border:0"><h4 class="mono">O'zgarishlar tarixi</h4><div class="hist" id="bHist"><span style="color:var(--muted)">Yuklanmoqda...</span></div></div>`;
+  $("#bClose").onclick = () => { S.bsel = null; renderBRows(); renderBDetail(); };
+  $("#bEdit").onclick = () => openBranchModal(b);
+  $("#bToggle").onclick = () => toggleBranch(b);
+  const bm = $("#bMap"); if (bm) bm.onclick = () => { setTab("xarita"); setTimeout(() => focusBranch(b.id), 300); };
+  document.querySelectorAll("#bdetail [data-lead]").forEach(a => a.onclick = e => { e.preventDefault(); openLeadFromAnywhere(+a.dataset.lead); });
+  const h = await (await fetch("/api/tarix?id=" + encodeURIComponent(b.id))).json();
+  if ($("#bHist")) $("#bHist").innerHTML = h.map(histRow).join("") || '<span style="color:var(--muted)">Dashboard orqali hali o\'zgartirilmagan</span>';
+}
+const FLD = {nomi:"Nomi",mrk:"Kod",hudud:"Hudud",manager:"Menejer",phone1:"Telefon 1",phone2:"Telefon 2",address:"Manzil",landmark:"Mo'ljal",locationUrl:"Havola",lat:"Lat",lng:"Lng",izoh:"Izoh",status:"Holat",ochilgan:"Ochilgan",ijara:"Ijara",banner:"Banner",yopilgan_sana:"Yopilgan sana"};
+function histRow(r){
+  const ch = Object.entries(r.ozgarish||{}).filter(([k])=>FLD[k] && r.amal==="tahrirlandi").slice(0,4).map(([k,[a,b]])=>`${FLD[k]}: ${esc(a??"—")} → <b>${esc(b??"—")}</b>`).join("<br>");
+  return `<div><b>${esc(r.nomi)}</b> — ${esc(r.amal)}<small>${esc(r.vaqt)} · ${esc(r.kim)}</small>${ch?`<div style="margin-top:3px">${ch}</div>`:""}</div>`;
+}
+async function toggleBranch(b){
+  const closing = isAct(b);
+  if (!confirm(`${b.nomi} — ${closing ? "YOPILSINmi?" : "qayta OCHILSINmi?"}`)) return;
+  await saveBranch(b.id, {status: closing ? "Yopilgan" : "Aktiv"});
+}
+async function saveBranch(id, body){
+  const r = await fetch(id ? `/api/branches/${encodeURIComponent(id)}` : "/api/branches", {method: id ? "PUT" : "POST", headers:{"Content-Type":"application/json"}, body: JSON.stringify(body)});
+  const j = await r.json();
+  if (!j.ok) { toast("❌ " + j.error); return null; }
+  toast("✅ Saqlandi"); S.bsel = j.branch.id; await load(true); return j.branch;
+}
+$("#bq").addEventListener("input", () => { S.blimit = 200; renderBChips(); renderBRows(); });
+["#bh"].forEach(s => $(s).addEventListener("input", () => { S.bhud = $("#bh").value; renderBGrid(); renderBChips(); renderBRows(); }));
+$("#bsort").addEventListener("input", renderBRows);
+$("#bAdd").onclick = () => openBranchModal(null);
+$("#bCsv").onclick = () => {
+  const cols = ["num","id","nomi","mrk","hudud","status","manager","phone1","phone2","address","landmark","ochilgan","yopilgan_sana","ijara","banner","lat","lng","aholi_3km","qoshni","qoshni_km","izoh"];
+  const q = v => `"${String(v ?? "").replace(/"/g,'""')}"`;
+  const csv = "﻿" + cols.join(";") + "\n" + bListed().map(b => cols.map(c=>q(b[c])).join(";")).join("\n");
+  const a = document.createElement("a"); a.href = URL.createObjectURL(new Blob([csv], {type:"text/csv;charset=utf-8"})); a.download = `filiallar_${TODAY()}.csv`; a.click();
+};
+
+/* ---------- filial modal ---------- */
+let mMap, mPin, mEditing = null, mFromLead = null;
+const MF = ["nomi","mrk","hudud","status","manager","phone1","phone2","address","landmark","ochilgan","yopilgan_sana","locationUrl","lat","lng","izoh"];
+function openBranchModal(b, prefill={}, fromLead=null){
+  mEditing = b; mFromLead = fromLead;
+  const v = Object.assign({status:"Aktiv", ochilgan: b ? "" : TODAY()}, b || {}, prefill);
+  MF.forEach(k => $("#m_"+k).value = v[k] ?? "");
+  $("#m_ijara").checked = v.ijara === "Bor"; $("#m_banner").checked = v.banner === "Bor";
+  $("#mTitle").textContent = b ? `${b.nomi} — tahrirlash` : (fromLead ? "Arizadan yangi filial" : "Yangi filial");
+  $("#mSub").textContent = b ? `№${b.num} · ${b.id}` : "";
+  $("#mDel").classList.toggle("hidden", !b); $("#mErr").textContent = "";
+  $("#modal").classList.add("on");
+  setTimeout(() => {
+    if (!mMap) {
+      mMap = L.map("mMap").setView([41.2, 64.6], 6);
+      baseLayer().addTo(mMap);
+      mMap.on("click", e => { $("#m_lat").value = e.latlng.lat.toFixed(6); $("#m_lng").value = e.latlng.lng.toFixed(6); mSync(false); });
+      ["#m_lat","#m_lng"].forEach(s => $(s).addEventListener("change", () => mSync(true)));
+    }
+    mMap.invalidateSize(); mSync(true);
+  }, 60);
+}
+function mSync(center){
+  const lat = parseFloat($("#m_lat").value), lng = parseFloat($("#m_lng").value);
+  if (mPin) { mMap.removeLayer(mPin); mPin = null; }
+  if (isNaN(lat) || isNaN(lng)) { $("#mNear").textContent = "Koordinata kiritilmagan"; if (center) mMap.setView([41.2, 64.6], 6); return; }
+  mPin = L.circleMarker([lat,lng], {radius:9, color:"#fff", weight:3, fillColor:cssv("--teal"), fillOpacity:1}).addTo(mMap);
+  if (center) mMap.setView([lat,lng], 14);
+  const near = (S.N?.branches||[]).filter(x=>x.lat && isAct(x) && (!mEditing || x.id!==mEditing.id)).map(x=>({x, km:hav(lat,lng,x.lat,x.lng)})).sort((a,b)=>a.km-b.km).slice(0,3);
+  $("#mNear").innerHTML = near.length ? "Eng yaqin aktiv filiallar: " + near.map(n=>`<b>${esc(n.x.nomi)}</b> ${n.km.toFixed(2)} km${n.km<1?' <span class="mini x-bad">juda yaqin</span>':""}`).join(" · ") : "";
+}
+function closeModal(){ $("#modal").classList.remove("on"); }
+$("#mClose").onclick = closeModal; $("#mCancel").onclick = closeModal;
+$("#modal").addEventListener("click", e => { if (e.target.id === "modal") closeModal(); });
+$("#mUrl").onclick = async () => {
+  const url = $("#m_locationUrl").value.trim(); if (!url) return;
+  const m = url.match(/(-?\d{2}\.\d+)\s*,\s*(-?\d{2}\.\d+)/);
+  let lat, lon;
+  if (m && !/^https?:/.test(url)) { lat = +m[1]; lon = +m[2]; }
+  else { const r = await fetch("/api/evaluate", {method:"POST", headers:{"Content-Type":"application/json"}, body:JSON.stringify({url})}); const j = await r.json(); if (j.ok) { lat = j.lat; lon = j.lon; } }
+  if (lat == null) { $("#mErr").textContent = "Havoladan koordinata topilmadi"; return; }
+  $("#m_lat").value = (+lat).toFixed(6); $("#m_lng").value = (+lon).toFixed(6); $("#mErr").textContent = ""; mSync(true);
+};
+$("#mSave").onclick = async () => {
+  const body = {}; MF.forEach(k => body[k] = $("#m_"+k).value.trim());
+  body.ijara = $("#m_ijara").checked ? "Bor" : "Yo'q"; body.banner = $("#m_banner").checked ? "Bor" : "Yo'q";
+  if (!body.nomi) { $("#mErr").textContent = "Filial nomini kiriting"; return; }
+  if (!mEditing && S.N.branches.some(x => (x.nomi||"").toLowerCase() === body.nomi.toLowerCase()) && !confirm("Shu nomli filial bor. Baribir qo'shilsinmi?")) return;
+  if (mFromLead) body.from_lead = mFromLead;
+  $("#mSave").disabled = true;
+  const r = await fetch(mEditing ? `/api/branches/${encodeURIComponent(mEditing.id)}` : "/api/branches", {method: mEditing ? "PUT" : "POST", headers:{"Content-Type":"application/json"}, body: JSON.stringify(body)});
+  const j = await r.json(); $("#mSave").disabled = false;
+  if (!j.ok) { $("#mErr").textContent = j.error; return; }
+  closeModal(); toast(mEditing ? "✅ Filial yangilandi" : "✅ Filial qo'shildi");
+  S.bsel = j.branch.id; if (!mEditing) setTab("filiallar");
+  await load(true);
+};
+$("#mDel").onclick = async () => {
+  if (!mEditing) return;
+  const ans = prompt(`"${mEditing.nomi}" butunlay o'chiriladi (zaxira nusxasi saqlanadi).\nOdatda o'chirish o'rniga "Yopish" tavsiya etiladi.\nTasdiqlash uchun filial nomini yozing:`);
+  if (ans === null) return;
+  if (ans.trim().toLowerCase() !== mEditing.nomi.toLowerCase()) { $("#mErr").textContent = "Nom mos kelmadi — o'chirilmadi"; return; }
+  const r = await fetch(`/api/branches/${encodeURIComponent(mEditing.id)}`, {method:"DELETE"}); const j = await r.json();
+  if (!j.ok) { $("#mErr").textContent = j.error; return; }
+  closeModal(); S.bsel = null; toast("🗑 Filial o'chirildi"); await load(true);
+};
+function leadToBranch(l){
+  const QOQON = ["Qo'qon","Bog'dod","Buvayda","Dang'ara","Furqat","Uchko'prik","O'zbekiston"];
+  let hudud = l.viloyat === "Qoraqalpog'iston" ? "Qoraqalpog'iston Respublikasi" : l.viloyat;
+  if (l.viloyat === "Farg'ona" && QOQON.some(t => (l.tuman||"").startsWith(t))) hudud = "Qo'qon";
+  const base = (l.tuman||"").replace(/ sh\.$/, " shahar").replace(/ tumani$/, " tuman");
+  const n = (S.N?.branches||[]).filter(b => (b.nomi||"").toLowerCase().startsWith(base.split(" ")[0].toLowerCase())).length + 1;
+  openBranchModal(null, {nomi:`${base} ${n}`, hudud, manager:l.name, phone1:(l.phone||"").replace(/\D/g,"").slice(-9),
+    address:[l.viloyat, l.tuman, l.answers.manzil].filter(Boolean).join(", "), lat:l.lat??"", lng:l.lon??"", locationUrl:l.map||"",
+    ijara: l.answers.joy && /ijara/i.test(l.answers.joy) ? "Bor" : "Yo'q", izoh:`Telegram arizasi #${l.id}`}, l.id);
+}
+
+/* ---------- ARIZALAR ---------- */
+function renderVil(){
+  const c = {}; S.L.leads.forEach(l => { if (l.viloyat && l.viloyat!=="-") c[l.viloyat]=(c[l.viloyat]||0)+1; });
+  const rows = Object.entries(c).sort((a,b)=>b[1]-a[1]); const max = Math.max(1,...rows.map(r=>r[1]));
+  $("#vgrid").innerHTML = rows.map(([v,n]) => `<div class="vrow ${S.vil===v?"on":""}" data-v="${esc(v)}"><div>${esc(v)}</div>
+    <div class="track"><span style="width:${n/max*100}%"></span></div><b>${n}</b></div>`).join("") || '<div class="empty">Hali ariza yo\'q</div>';
+  document.querySelectorAll("#vgrid .vrow").forEach(el => el.onclick = () => { S.vil = S.vil===el.dataset.v ? "" : el.dataset.v; $("#fv").value = S.vil; renderVil(); renderChips(); renderRows(); });
+}
+const isNew = l => !isDraft(l) && !l.korildi;
+const isTasdiq = l => !!l.bosqich || ["Qiziqdi","Uchrashuv","Shartnoma"].includes(l.status) || !!l.filial_id;
+const VIEWS = [
+  ["", "Hammasi", l => true],
+  ["new", "🆕 Yangi", isNew],
+  ["maqul", "✅ Ma'qul", l => !isDraft(l) && l.xulosa.startsWith("✅")],
+  ["tasdiq", "☑️ Tasdiqlangan", isTasdiq],
+  ["korib", "⚠️ Ko'rib chiqish", l => !isDraft(l) && l.xulosa.startsWith("⚠")],
+  ["emas", "❌ Ma'qul emas", l => !isDraft(l) && l.xulosa.startsWith("❌")],
+  ["draft", "⏳ Tugallanmagan", isDraft],
+];
+function dateOk(l){
+  const v = $("#fd").value, d = l.created.slice(0,10), t = TODAY();
+  if (!v) return true;
+  if (v === "bugun") return d === t;
+  if (v === "kecha") return d === daysAgo(1);
+  if (v === "7") return d >= daysAgo(6);
+  if (v === "30") return d >= daysAgo(29);
+  if (v === "oy") return d.slice(0,7) === t.slice(0,7);
+  const a = $("#fd1").value, b = $("#fd2").value;
+  return (!a || d >= a) && (!b || d <= b);
+}
+function preFiltered(){
+  const q = $("#q").value.toLowerCase().trim(), fv = $("#fv").value;
+  const kf = S.kpi && S.kpi.startsWith("l-") ? KF[S.kpi] : null;
+  return S.L.leads.filter(l => {
+    if (kf && !kf(l)) return false;
+    if (fv && l.viloyat !== fv) return false;
+    if (!dateOk(l)) return false;
+    if ($("#hideDubl").checked && (l.dubl || l.status==="Dubl")) return false;
+    if ($("#onlyPhone").checked && !l.phone) return false;
+    if (q) { const hay = [l.name,l.phone,l.username,l.viloyat,l.tuman,l.izoh,l.source,l.sabab,...Object.values(l.answers),...Object.values(l.answers2)].join(" ").toLowerCase(); if (!hay.includes(q)) return false; }
+    return true;
+  });
+}
+function baseFiltered(){ const f = VIEWS.find(v => v[0] === (S.view || ""))[2]; return preFiltered().filter(f); }
+function renderViews(){
+  const pre = preFiltered(), nNew = S.L.leads.filter(isNew).length;
+  $("#views").innerHTML = VIEWS.map(([k,t,f]) => `<button class="view ${k==="new"?"vnew":""} ${(S.view||"")===k?"on":""}" data-v="${k}" title="${
+      k==="tasdiq" ? "Taklif yuborilgan, qiziqqan, uchrashuv yoki shartnoma bosqichidagilar" : k==="new" ? "Dashboardda hali ochilmagan arizalar" : ""}">${t} <b>${pre.filter(f).length}</b></button>`).join("")
+    + (nNew ? `<button class="abtn" id="seenAll" style="margin-left:auto">✓ Hammasini ko'rildi deb belgilash</button>` : "");
+  document.querySelectorAll("#views .view").forEach(b => b.onclick = () => { S.view = b.dataset.v; S.limit = 150; renderViews(); renderChips(); renderRows(); });
+  const sa = $("#seenAll"); if (sa) sa.onclick = async () => {
+    if (!confirm(`${nNew} ta yangi ariza "ko'rildi" deb belgilansinmi?`)) return;
+    await fetch("/api/korildi_hammasi", {method:"POST"}); await load(); toast("✓ Belgilandi");
+  };
+}
+function renderChips(){
+  const base = baseFiltered(); const cnt = k => base.filter(l => k==="Dubl" ? (l.dubl||l.status==="Dubl") : l.status===k).length;
+  $("#chips").innerHTML = `<button class="chip ${S.status===""?"on":""}" data-s="">Barchasi <b>${base.length}</b></button>` +
+    S.L.statuses.map(s => `<button class="chip ${S.status===s.k?"on":""}" data-s="${esc(s.k)}"><i style="background:var(--${s.c})"></i>${esc(s.k)} <b>${cnt(s.k)}</b></button>`).join("");
+  document.querySelectorAll("#chips .chip").forEach(el => el.onclick = () => { S.status = el.dataset.s; renderChips(); renderRows(); });
+}
+function listed(){
+  let rows = baseFiltered();
+  if (S.status) rows = rows.filter(l => S.status==="Dubl" ? (l.dubl||l.status==="Dubl") : l.status===S.status);
+  const cmp = {new:(a,b)=>b.created.localeCompare(a.created), old:(a,b)=>a.created.localeCompare(b.created),
+    score:(a,b)=>b.score-a.score, aloqa:(a,b)=>(a.aloqa_sana||"9").localeCompare(b.aloqa_sana||"9")}[$("#sort").value];
+  return rows.sort(cmp);
+}
+function phonePill(l){
+  if (l.phone) return `<span class="ph">${esc(l.phone.replace(/^\+998(\d\d)(\d{3})(\d\d)(\d\d)$/, "+998 $1 $2 $3 $4"))}</span>`;
+  if (l.username) return `<span class="ph tg">@${esc(l.username)}</span>`;
+  return '<span style="color:var(--muted)">—</span>';
+}
+const stPill = k => `<span class="st" style="background:${stColor(k)}">${esc(k)}</span>`;
+function dayGroup(d){
+  if (d === TODAY()) return "Bugun"; if (d === daysAgo(1)) return "Kecha";
+  if (d >= daysAgo(6)) return "Shu hafta"; if (d >= daysAgo(29)) return "Shu oy"; return "Oldinroq";
+}
+function renderRows(){
+  const rows = listed(), show = rows.slice(0, S.limit);
+  const byDate = ["new","old"].includes($("#sort").value);
+  const grpCount = {}; if (byDate) rows.forEach(l => { const g = dayGroup(l.created.slice(0,10)); grpCount[g] = (grpCount[g]||0) + 1; });
+  let lastG = null;
+  $("#rows").innerHTML = show.map(l => { const g = byDate ? dayGroup(l.created.slice(0,10)) : null;
+    const sep = g && g !== lastG ? `<div class="lsep">${g} · <b>${grpCount[g]}</b></div>` : ""; lastG = g;
+    return sep + `<div class="lr lead ${isNew(l)?"new":""} ${S.sel===l.id?"sel":""}" data-id="${l.id}">
+    <div class="dt">${fmtDate(l.created)}<small>${esc(l.created.slice(11,16))}</small></div>
+    <div class="nm">${isNew(l)?'<span class="newb">YANGI</span>':""}${esc(l.name||"—")}<span class="mini x-${xcls(l)}">${xshort(l)}</span><small>${esc(l.viloyat)}${l.tuman&&l.tuman!=="-"?", "+esc(l.tuman):""}</small></div>
+    <div class="addr opt">${esc(l.answers.manzil || [l.viloyat,l.tuman].filter(x=>x&&x!=="-").join(", "))}</div>
+    <div>${phonePill(l)}</div>
+    <div>${stPill(l.status)}${l.dubl?' <span class="mini x-draft">dubl</span>':""}${l.filial_id?' <span class="mini x-ok">filial</span>':""}</div>
+    <div class="iz opt ${l.izoh?"has":""}">${l.aloqa_sana?`📅 ${fmtDate(l.aloqa_sana)} · `:""}${esc(l.izoh || "izoh yo'q")}</div></div>`; }).join("")
+    + (rows.length > S.limit ? `<div class="more"><button class="abtn" id="moreBtn">Yana ko'rsatish (${rows.length - S.limit})</button></div>` : "")
+    || '<div class="empty">Ariza topilmadi</div>';
+  document.querySelectorAll("#rows .lr").forEach(el => el.onclick = () => { S.sel = +el.dataset.id; S.dirty = false; markSeen(S.sel); renderRows(); renderDetail(); });
+  const mb = $("#moreBtn"); if (mb) mb.onclick = () => { S.limit += 200; renderRows(); };
+}
+function markSeen(id){
+  const l = S.L.leads.find(x => x.id === id); if (!l || !isNew(l)) return;
+  l.korildi = "hozir";   // darhol oddiy ko'rinishga o'tadi, serverga fonda yoziladi
+  fetch(`/api/lead/${id}`, {method:"POST", headers:{"Content-Type":"application/json"}, body: JSON.stringify({korildi:true})});
+  renderViews(); renderChips(); renderTabCounts();
+}
+function renderDetail(){
+  const l = S.L.leads.find(x=>x.id===S.sel);
+  if (!l) { $("#detail").innerHTML = `<div class="dh"><div><div class="mono">Ariza</div><h3>Ariza tanlang</h3><div class="s">Ro'yxatdan birini bosing</div></div></div><div class="empty">Chapdagi ro'yxatdan arizani tanlang.</div>`; return; }
+  const kv = rows => rows.filter(r=>r[1]!==undefined&&r[1]!==null&&r[1]!=="").map(([a,b])=>`<div>${esc(a)}</div><div>${b}</div>`).join("");
+  const canOffer = !isDraft(l) && !l.bosqich && (l.xulosa.startsWith("✅")||l.xulosa.startsWith("⚠"));
+  const photos = l.photos.map(k => { const f = S.L.followup.find(q=>q.key===k);
+    return `<a href="/photo/${l.id}/${encodeURIComponent(k)}" target="_blank"><img src="/photo/${l.id}/${encodeURIComponent(k)}" alt=""><span>${esc(f?f.label:k)}</span></a>`; }).join("");
+  const a2 = S.L.followup.filter(q=>q.type!=="photo" && l.answers2[q.key]).map(q=>[q.label, `<pre>${esc(l.answers2[q.key])}</pre>`]);
+  const fb = l.filial_id && S.N ? S.N.branches.find(b=>String(b.id)===String(l.filial_id)) : null;
+  $("#detail").innerHTML = `
+    <div class="dh"><div><div class="mono">Ariza · ${fmtDate(l.created)} ${esc(l.created.slice(11,16))}</div><h3>${esc(l.name||"—")}</h3><div class="s">${esc(l.viloyat)}, ${esc(l.tuman)}</div>
+      <div style="margin-top:8px;display:flex;gap:6px;flex-wrap:wrap">${stPill(l.status)}<span class="mini x-${xcls(l)}" style="margin:0">${esc(isDraft(l)?"⏳ Tugallanmagan":l.xulosa)}</span>
+      <span class="mini x-draft" style="margin:0">${esc(l.level)} · ${l.score} ball</span>${l.dubl?'<span class="mini x-bad" style="margin:0">Dubl telefon</span>':""}</div></div>
+      <button class="xbtn" id="dclose">×</button></div>
+    <div class="ds"><div class="acts">${l.phone?`<a class="abtn" href="tel:${esc(l.phone)}">📞 Qo'ng'iroq</a>`:""}
+      ${l.username?`<a class="abtn" href="https://t.me/${esc(l.username)}" target="_blank">✈️ Telegram</a>`:`<a class="abtn" href="tg://user?id=${l.id}">✈️ Telegram</a>`}
+      ${l.map?`<a class="abtn" href="${esc(l.map)}" target="_blank">📍 Lokatsiya</a>`:""}
+      ${fb?`<button class="abtn teal" id="goBranch">🏢 ${esc(fb.nomi)}</button>`:(!isDraft(l)?`<button class="abtn" id="toBranch">🏢 Filial qilib qo'shish</button>`:"")}</div>
+</div>
+    ${stageBlock(l)}
+    <div class="ds"><h4 class="mono">Status</h4><div class="sbtns">${S.L.statuses.map(s => `<button class="sbtn ${l.status===s.k?"on":""}" data-s="${esc(s.k)}" style="${l.status===s.k?`background:var(--${s.c});border-color:var(--${s.c})`:""}"><i style="background:var(--${s.c})"></i>${esc(s.k)}</button>`).join("")}</div>
+      ${l.status_vaqt?`<div style="margin-top:6px;font-size:12px;color:var(--muted)">O'zgartirilgan: ${esc(l.status_vaqt)}</div>`:""}</div>
+    <div class="ds"><h4 class="mono">Keyingi aloqa va izoh</h4>
+      <div style="display:flex;gap:6px;flex-wrap:wrap;margin-bottom:8px"><input type="date" class="inp" id="dAloqa" value="${esc(l.aloqa_sana)}">
+        <button class="abtn" data-d="0">Bugun</button><button class="abtn" data-d="1">Ertaga</button><button class="abtn" data-d="3">+3 kun</button><button class="abtn" data-d="x">Tozalash</button></div>
+      <textarea class="inp" id="dIzoh" placeholder="Izoh: nima gaplashildi, keyingi qadam...">${esc(l.izoh)}</textarea>
+      <div style="margin-top:8px;display:flex;gap:8px;align-items:center"><button class="abtn pri" id="dSave">Saqlash</button><span style="font-size:12px;color:var(--muted)" id="dSaved"></span></div></div>
+    <div class="ds"><h4 class="mono">Filiallar bilan solishtirish</h4><div class="kv">${kv([
+      ["Xulosa", esc(l.xulosa)], ["Sabab", esc(l.sabab)], ["Eng yaqin filial", esc(l.eng_yaqin)],
+      ["Masofa", l.masofa_km!=null ? l.masofa_km.toFixed(2)+" km" : ""], ["Tumandagi filiallar", l.tumanda_filial],
+      ["Aholi zichligi", esc(l.zichlik)], ["Eng yaqin 3 ta", esc((l.yaqinlar||[]).join(", "))]])}</div></div>
+    <div class="ds"><h4 class="mono">Anketa javoblari</h4><div class="kv">${kv(S.L.questions.map(q=>[q.label, esc(l.answers[q.key]||"—")]))}</div></div>
+    ${(a2.length||photos)?`<div class="ds"><h4 class="mono">Qo'shimcha ma'lumot</h4><div class="kv">${kv(a2)}</div>${photos?`<div class="photos">${photos}</div>`:""}</div>`:""}
+    <div class="ds" style="border:0"><h4 class="mono">Boshqa</h4><div class="kv">${kv([["Manba", esc(l.source)],["Anketa", esc(l.holat)],["Yangilangan", esc(l.updated)],["Telegram ID", l.id]])}</div></div>`;
+  $("#dclose").onclick = () => { S.sel = null; renderRows(); renderDetail(); };
+  document.querySelectorAll("#detail .sbtn").forEach(b => b.onclick = () => saveLead(l, {status: b.dataset.s}));
+  document.querySelectorAll("#detail [data-d]").forEach(b => b.onclick = () => { const d=b.dataset.d; $("#dAloqa").value = d==="x" ? "" : daysAgo(-(+d)); S.dirty = true; $("#dSaved").textContent = "saqlanmagan"; });
+  ["#dIzoh","#dAloqa"].forEach(s => $(s).addEventListener("input", () => { S.dirty = true; $("#dSaved").textContent = "saqlanmagan"; }));
+  $("#dSave").onclick = () => saveLead(l, {izoh: $("#dIzoh").value, aloqa_sana: $("#dAloqa").value});
+  document.querySelectorAll("#detail [data-stage]").forEach(b => b.onclick = () => doStage(l, b.dataset.stage, b));
+  const tb = $("#toBranch"); if (tb) tb.onclick = () => leadToBranch(l);
+  const gb = $("#goBranch"); if (gb) gb.onclick = () => { S.bsel = fb.id; setTab("filiallar"); };
+}
+async function saveLead(l, body){
+  if (body.status === undefined && !S.dirty) return;
+  if (body.status !== undefined && S.dirty) { body.izoh = $("#dIzoh").value; body.aloqa_sana = $("#dAloqa").value; }
+  const r = await fetch(`/api/lead/${l.id}`, {method:"POST", headers:{"Content-Type":"application/json"}, body: JSON.stringify(body)});
+  const j = await r.json(); if (!j.ok) return toast("❌ " + j.error);
+  S.dirty = false; toast("✅ Saqlandi"); await load();
+}
+/* ---------- Bosqichlar: 1 Ariza → 2 Taklif → 3 Hujjatlar → ✅ Tasdiqlandi ---------- */
+function stageInfo(l){
+  const b = l.bosqich || "";
+  if (isDraft(l)) return {cur:1, note:"Odam anketani hali oxirigacha to'ldirmagan.", acts:[]};
+  if (!b) return {cur:1, note: l.xulosa.startsWith("❌") ? "Xulosa: ma'qul emas. Baribir davom ettirish mumkin." : "Ariza qabul qilingan. Ma'qul bo'lsa — taklif yuboring.",
+    acts:[["offer","📨 2-bosqich: taklif yuborish","pri"]]};
+  if (b.startsWith("📨") || b.startsWith("❓")) return {cur:2, note: b.startsWith("❓") ? "Odam savol berdi (javob Telegram'da). U hali rozilik bildirmagan." : "Taklif yuborilgan, odam javobini kutyapmiz.",
+    acts:[["docs","➡️ 3-bosqichga o'tkazish","pri"],["remind","🔔 Taklifni qayta yuborish",""]]};
+  if (b.startsWith("🚫")) return {cur:2, bad:true, note:"Odam taklifni rad etgan.", acts:[["offer","📨 Taklifni qayta yuborish",""],["docs","➡️ Baribir 3-bosqichga o'tkazish",""]]};
+  if (b.startsWith("🤝")) return {cur:3, note:"Odam rozi bo'ldi va hujjatlarni yuboryapti (pasport, rasmlar, bank).", acts:[["remind","🔔 Eslatma yuborish",""]]};
+  if (b.startsWith("📋")) return {cur:3, done3:true, note:"Hujjatlar to'liq keldi — tekshirib, tasdiqlang yoki qaytadan so'rang.",
+    acts:[["approve","✅ Hujjatlarni tasdiqlash","teal"],["reject","↩️ Qayta so'rash","danger"]]};
+  if (b.startsWith("✅")) return {cur:4, note:"Hujjatlar tasdiqlangan. Endi shartnoma va filialni ochish.", acts:[["reject","↩️ Hujjatlarni qayta so'rash","danger"]]};
+  return {cur:1, note:b, acts:[]};
+}
+function stageBlock(l){
+  const st = stageInfo(l), steps = ["Ariza","Taklif","Hujjatlar","Tasdiqlandi"];
+  const dot = (i) => { const n = i + 1, done = n < st.cur || (n === 3 && st.done3) || (n === 4 && st.cur === 4), cur = n === st.cur && !done;
+    return `<div class="stp ${done?"done":""} ${cur?(st.bad?"bad":"cur"):""}"><span>${done?"✓":n}</span><small>${steps[i]}</small></div>`; };
+  return `<div class="ds"><h4 class="mono">Bosqichlar</h4>
+    <div class="stps">${steps.map((_, i) => dot(i)).join('<i class="stl"></i>')}</div>
+    <div style="font-size:13px;margin:10px 0 ${st.acts.length?"10px":"0"}">${esc(st.note)}${l.bosqich?` <span style="color:var(--muted)">· ${esc(l.bosqich)}</span>`:""}</div>
+    ${st.acts.length?`<div class="acts">${st.acts.map(([a,t,c]) => `<button class="abtn ${c}" data-stage="${a}">${t}</button>`).join("")}</div>`:""}
+    <div style="font-size:11.5px;color:var(--muted);margin-top:8px">Tugma bosilganda bot odamga darhol keyingi bosqich xabarini yuboradi.</div></div>`;
+}
+async function doStage(l, action, btn){
+  const Q = {
+    offer: `${l.name} ga tijoriy taklif yuborilsinmi?`,
+    docs: `${l.name} 3-bosqichga o'tkazilsinmi?\nBot unga pasport, rasmlar va bank ma'lumotlarini so'rashni boshlaydi.`,
+    remind: `${l.name} ga eslatma yuborilsinmi?`,
+    approve: `${l.name} ning hujjatlari tasdiqlansinmi?\nBot unga tabrik xabarini yuboradi.`,
+  };
+  let reason = "";
+  if (action === "reject") {
+    reason = prompt(`${l.name} dan hujjatlar qaytadan so'raladi.\nSababini yozing (odamga ko'rinadi), masalan: "pasport rasmi xira":`, "");
+    if (reason === null) return;
+  } else if (!confirm(Q[action])) return;
+  btn.disabled = true; const old = btn.textContent; btn.textContent = "Yuborilmoqda...";
+  const r = await fetch(`/api/stage/${l.id}`, {method:"POST", headers:{"Content-Type":"application/json"}, body: JSON.stringify({action, reason})});
+  const j = await r.json();
+  if (!j.ok) { btn.disabled = false; btn.textContent = old; return toast("❌ " + j.error); }
+  toast("✅ Bajarildi — bot odamga xabar yubordi"); await load();
+}
+async function sendOffer(l){
+  if (!confirm(`${l.name} ga tijoriy taklif yuborilsinmi?`)) return;
+  const b = $("#offerBtn"); b.disabled = true; b.textContent = "Yuborilmoqda...";
+  const r = await fetch(`/api/offer/${l.id}`, {method:"POST"}); const j = await r.json();
+  toast(j.ok ? "✅ Taklif yuborildi" : "❌ " + j.error); await load();
+}
+["#q","#sort","#hideDubl","#onlyPhone","#fd1","#fd2"].forEach(s => $(s).addEventListener("input", () => { renderViews(); renderChips(); renderRows(); }));
+$("#fd").addEventListener("input", () => { $("#fdRange").classList.toggle("hidden", $("#fd").value !== "oraliq"); renderViews(); renderChips(); renderRows(); });
+$("#fv").addEventListener("input", () => { S.vil = $("#fv").value; renderVil(); renderViews(); renderChips(); renderRows(); });
+
+/* ---------- charts ---------- */
+function chart(id, cfg){
+  if (S.charts[id]) S.charts[id].destroy();
+  const el = document.getElementById(id); if (!el || !window.Chart) return;
+  Chart.defaults.color = cssv("--muted"); Chart.defaults.borderColor = cssv("--line"); Chart.defaults.font.family = "Archivo, system-ui, sans-serif";
+  S.charts[id] = new Chart(el, cfg);
+}
+const hbar = (labels, data, color) => ({type:"bar", data:{labels, datasets:[{data, backgroundColor:color, borderRadius:5, maxBarThickness:22}]},
+  options:{indexAxis:"y", maintainAspectRatio:false, plugins:{legend:{display:false}}, scales:{x:{beginAtZero:true, ticks:{precision:0}}, y:{grid:{display:false}}}}});
+const vbar = (labels, data, color) => ({type:"bar", data:{labels, datasets:[{data, backgroundColor:color, borderRadius:4}]},
+  options:{maintainAspectRatio:false, plugins:{legend:{display:false}}, scales:{y:{beginAtZero:true, ticks:{precision:0}}, x:{grid:{display:false}}}}});
+
+function renderTahlil(){
+  document.querySelectorAll(".seg button").forEach(b => b.classList.toggle("on", b.dataset.s === S.seg));
+  if (S.seg === "tarmoq") renderTarmoq(); else renderArizaTahlil();
+}
+document.querySelectorAll(".seg button").forEach(b => b.onclick = () => { S.seg = b.dataset.s; renderTahlil(); });
+
+function renderTarmoq(){
+  if (!S.N) { $("#tahlilBody").innerHTML = '<div class="empty">Filiallar ma\'lumoti o\'qilmadi.</div>'; return; }
+  const N = S.N, s = N.summary, L = S.L.leads.filter(l=>!isDraft(l));
+  const QOQON = ["Qo'qon","Bog'dod","Buvayda","Dang'ara","Furqat","Uchko'prik","O'zbekiston"];
+  const isQoqon = l => l.viloyat === "Farg'ona" && QOQON.some(t => (l.tuman||"").startsWith(t));
+  const leadsBy = h => L.filter(l => h === "Qo'qon" ? isQoqon(l) : h === "Farg'ona" ? l.viloyat === h && !isQoqon(l)
+    : l.viloyat === h || (h === "Qoraqalpog'iston Respublikasi" && l.viloyat === "Qoraqalpog'iston")).length;
+  const worst = N.viloyatlar[0], closedTop = [...N.viloyatlar].sort((a,b)=>b.yopilish_foiz-a.yopilish_foiz)[0], bigGap = N.gaps[0];
+  const ins = [
+    worst ? `Eng kam qamrangan hudud — <b>${esc(worst.hudud)}</b>: ${worst.aholi_per_filial} ming aholiga 1 ta aktiv filial (${worst.aktiv} ta filial).` : "",
+    `Aholining <b>${s.qamrov_foiz}%</b>i (${s.qamrov_mln} / ${s.aholi_jami_mln} mln) aktiv filialdan ${s.cover_km} km ichida yashaydi.`,
+    bigGap ? `Eng katta bo'sh hudud: <b>${esc(bigGap.hudud)}${bigGap.joy?", "+esc(bigGap.joy):""}</b> — 3 km atrofida ~${(bigGap.aholi_3km/1000).toFixed(0)} ming aholi, eng yaqin filial ${bigGap.masofa_km} km.` : "",
+    closedTop ? `Yopilish eng yuqori: <b>${esc(closedTop.hudud)}</b> — ${closedTop.yopilish_foiz}% (${closedTop.yopilgan} / ${closedTop.jami}).` : "",
+    N.close_pairs.length ? `<b>${N.close_pairs.length}</b> juft aktiv filial bir-biridan 1 km dan yaqin.` : "",
+    `Aktiv filiallarning <b>${s.ijara}</b> tasi ijarada, <b>${s.banner}</b> tasida banner bor (${s.aktiv - s.banner} tasida yo'q).`,
+    s.kam_aholili_aktiv ? `<b>${s.kam_aholili_aktiv}</b> ta aktiv filial aholisi kam joyda (1 km² da 300 kishidan kam).` : "",
+  ].filter(Boolean);
+  const maxApf = Math.max(...N.viloyatlar.map(v=>v.aholi_per_filial||0));
+  const heat = v => `background:rgba(74,127,153,${(0.08 + Math.min(1,(v||0)/maxApf)*0.55).toFixed(2)})`;
+  $("#tahlilBody").innerHTML = `
+    <div class="mk">
+      <div class="box"><div class="mono">Aktiv</div><div class="v">${s.aktiv}</div></div>
+      <div class="box"><div class="mono">Yopilgan</div><div class="v">${s.yopilgan}</div></div>
+      <div class="box"><div class="mono">Qamrov 3 km</div><div class="v">${s.qamrov_foiz}%</div></div>
+      <div class="box"><div class="mono">Bo'sh hudud</div><div class="v">${N.gaps.length}</div></div>
+      <div class="box"><div class="mono">1 km juftlar</div><div class="v">${N.close_pairs.length}</div></div>
+      <div class="box"><div class="mono">Ma'lumot xatosi</div><div class="v">${N.sifat.length}</div></div>
+    </div>
+    <div class="box" style="margin-bottom:14px"><h5>Asosiy xulosalar</h5><ul class="insights">${ins.map(i=>`<li>${i}</li>`).join("")}</ul></div>
+    <div class="g2">
+      <div class="box"><h5>Filiallar ochilishi (oylar bo'yicha)</h5><div class="ch" style="height:340px"><canvas id="cOpen"></canvas></div></div>
+      <div class="box"><h5>Hududlar: aktiv va yopilgan</h5><div class="ch" style="height:340px"><canvas id="cVilBr"></canvas></div></div>
+    </div>
+    <div class="box" style="margin-top:14px"><h5>Hududlar kesimi</h5><div class="hint">"Aholi / filial" qancha katta bo'lsa, hudud shuncha kam qamrangan. Aholi — filiallar xaritasidagi taxminiy raqamlar (ming).</div>
+      <div class="scroll"><table class="tbl"><tr><th>Hudud</th><th class="num">Aktiv</th><th class="num">Yopilgan</th><th class="num">Yopilish</th><th class="num">Aholi, ming</th><th class="num">Aholi / filial</th><th class="num">Ijara</th><th class="num">Banner</th><th class="num">Bo'sh hudud</th><th class="num">Arizalar</th></tr>
+      ${N.viloyatlar.map(v=>`<tr><td>${esc(v.hudud)}</td><td class="num">${v.aktiv}</td><td class="num">${v.yopilgan}</td><td class="num">${v.yopilish_foiz}%</td><td class="num">${v.aholi_ming??"—"}</td>
+        <td class="num"><span class="heat" style="${heat(v.aholi_per_filial)}">${v.aholi_per_filial??"—"}</span></td><td class="num">${v.ijara}</td><td class="num">${v.banner}</td><td class="num">${v.oq_doglar}</td><td class="num">${leadsBy(v.hudud)}</td></tr>`).join("")}</table></div></div>
+    <div class="g2" style="margin-top:14px">
+      <div class="box"><h5>Aktiv filiallar: ijara va banner</h5><div class="ch"><canvas id="cIjara"></canvas></div></div>
+      <div class="box"><h5>Ma'lumot sifati — tuzatish kerak</h5><div class="scroll" style="max-height:250px"><table class="tbl"><tr><th>Filial</th><th>Hudud</th><th>Muammo</th></tr>
+        ${N.sifat.map(x=>`<tr><td>${esc(x.nomi)}</td><td>${esc(x.hudud)}</td><td>${esc(x.muammo)}</td></tr>`).join("")||'<tr><td colspan="3">Muammo yo\'q</td></tr>'}</table></div></div>
+    </div>
+    <div class="box" style="margin-top:14px"><h5>1 km dan yaqin aktiv filiallar</h5><div class="scroll" style="max-height:230px"><table class="tbl"><tr><th>Filial</th><th>Filial</th><th class="num">Masofa</th><th>Hudud</th></tr>
+      ${N.close_pairs.map(p=>`<tr><td>${esc(p.a)}</td><td>${esc(p.b)}</td><td class="num">${(p.km*1000).toFixed(0)} m</td><td>${esc(p.hudud)}</td></tr>`).join("")}</table></div></div>`;
+  const mo = N.ochilish_oylar; chart("cOpen", vbar(mo.map(m=>m[0]), mo.map(m=>m[1]), cssv("--teal")));
+  const vb = [...N.viloyatlar].sort((a,b)=>b.jami-a.jami);
+  chart("cVilBr", {type:"bar", data:{labels:vb.map(v=>v.hudud.replace(" Respublikasi","")), datasets:[
+      {label:"Aktiv", data:vb.map(v=>v.aktiv), backgroundColor:cssv("--green"), borderRadius:3},
+      {label:"Yopilgan", data:vb.map(v=>v.yopilgan), backgroundColor:cssv("--red"), borderRadius:3}]},
+    options:{indexAxis:"y", maintainAspectRatio:false, plugins:{legend:{position:"bottom"}}, scales:{x:{stacked:true, ticks:{precision:0}}, y:{stacked:true, grid:{display:false}, ticks:{autoSkip:false}}}}});
+  const A = N.branches.filter(isAct);
+  chart("cIjara", hbar(["Ijarada", "O'z joyida", "Banner bor", "Banner yo'q"],
+    [A.filter(b=>b.ijara==="Bor").length, A.filter(b=>b.ijara!=="Bor").length, A.filter(b=>b.banner==="Bor").length, A.filter(b=>b.banner!=="Bor").length],
+    [cssv("--teal"), cssv("--navy"), cssv("--green"), cssv("--orange")]));
+}
+function renderArizaTahlil(){
+  const L = S.L.leads, done = L.filter(l=>!isDraft(l));
+  const choiceQs = S.L.questions.filter(q => q.type === "choice");
+  const reasons = countBy(done.filter(l=>l.xulosa.startsWith("❌")||l.xulosa.startsWith("⚠")), l =>
+    /ichida filial bor/.test(l.sabab) ? "Yaqinida filial bor" : /Aholi kam/.test(l.sabab) ? "Aholi kam" : /mos emas/.test(l.sabab) ? "Lokatsiya tumanga mos emas" :
+    /Lokatsiya aniqlanmadi/.test(l.sabab) ? "Lokatsiya yo'q" : /o'rtacha/.test(l.sabab) ? "Aholi o'rtacha" : "Boshqa");
+  const conv = [["Arizalar", L.length], ["To'liq anketa", done.length], ["✅ Ma'qul", done.filter(l=>l.xulosa.startsWith("✅")).length],
+    ["Bog'lanildi+", L.filter(l=>!["Yangi","Ko'tarmadi","Dubl"].includes(l.status)).length], ["Issiq", L.filter(l=>["Qiziqdi","Uchrashuv","Shartnoma"].includes(l.status)).length],
+    ["Shartnoma", L.filter(l=>l.status==="Shartnoma").length], ["Filial ochildi", L.filter(l=>l.filial_id).length]];
+  const vilOk = countBy(done, l=>l.viloyat).map(([v,n]) => [v, n, done.filter(l=>l.viloyat===v && l.xulosa.startsWith("✅")).length]);
+  $("#tahlilBody").innerHTML = `<div class="g2">
+      <div class="box"><h5>Kunlik arizalar (30 kun)</h5><div class="ch"><canvas id="cDaily"></canvas></div></div>
+      <div class="box"><h5>Voronka: arizadan filialgacha</h5><div class="ch"><canvas id="cConv"></canvas></div></div>
+      <div class="box"><h5>Statuslar</h5><div class="ch"><canvas id="cStatus"></canvas></div></div>
+      <div class="box"><h5>Filiallar bilan solishtirish xulosasi</h5><div class="ch"><canvas id="cX"></canvas></div></div>
+      <div class="box"><h5>Nega ma'qul emas / ko'rib chiqishga tushdi</h5><div class="ch"><canvas id="cReason"></canvas></div></div>
+      <div class="box"><h5>Manbalar (e'lon havolalari)</h5><div class="ch"><canvas id="cSrc"></canvas></div></div>
+      ${choiceQs.map((q,i)=>`<div class="box"><h5>${esc(q.label)}</h5><div class="ch"><canvas id="cQ${i}"></canvas></div></div>`).join("")}
+      <div class="box"><h5>Viloyatlar: arizalar va ma'qul ulushi</h5><div class="scroll" style="max-height:250px"><table class="tbl">
+        <tr><th>Viloyat</th><th class="num">Ariza</th><th class="num">Ma'qul</th><th class="num">Ulush</th></tr>
+        ${vilOk.map(([v,n,ok])=>`<tr><td>${esc(v)}</td><td class="num">${n}</td><td class="num">${ok}</td><td class="num">${Math.round(ok/n*100)}%</td></tr>`).join("")}</table></div></div>
+    </div>`;
+  const days = [...Array(30)].map((_,i)=>daysAgo(29-i)), dm = Object.fromEntries(countBy(L, l=>l.created.slice(0,10)));
+  chart("cDaily", vbar(days.map(d=>d.slice(8,10)+"."+d.slice(5,7)), days.map(d=>dm[d]||0), cssv("--teal")));
+  chart("cConv", hbar(conv.map(c=>c[0]), conv.map(c=>c[1]), [cssv("--gray"),cssv("--navy"),cssv("--green"),cssv("--blue"),cssv("--purple"),cssv("--teal"),cssv("--green")]));
+  const st = S.L.statuses.map(s=>[s.k, L.filter(l=>l.status===s.k).length, cssv("--"+s.c)]);
+  chart("cStatus", hbar(st.map(s=>s[0]), st.map(s=>s[1]), st.map(s=>s[2])));
+  const xs = [["✅ Ma'qul","--green",l=>l.xulosa.startsWith("✅")],["⚠️ Ko'rib chiqish","--orange",l=>l.xulosa.startsWith("⚠")],["❌ Ma'qul emas","--red",l=>l.xulosa.startsWith("❌")]];
+  chart("cX", {type:"doughnut", data:{labels:xs.map(x=>x[0]), datasets:[{data:xs.map(x=>done.filter(x[2]).length), backgroundColor:xs.map(x=>cssv(x[1])), borderWidth:0}]},
+    options:{maintainAspectRatio:false, cutout:"62%", plugins:{legend:{position:"right"}}}});
+  chart("cReason", hbar(reasons.map(r=>r[0]), reasons.map(r=>r[1]), cssv("--red")));
+  const src = countBy(L, l=>l.source||"—"); chart("cSrc", hbar(src.map(r=>r[0]), src.map(r=>r[1]), cssv("--navy")));
+  choiceQs.forEach((q,i) => { const c = countBy(done, l=>l.answers[q.key]); chart("cQ"+i, hbar(c.map(r=>r[0].length>34?r[0].slice(0,32)+"…":r[0]), c.map(r=>r[1]), cssv("--teal"))); });
+}
+
+/* ---------- bo'sh hududlar ---------- */
+function renderGaps(){
+  if (!S.N) { $("#p-gaps").innerHTML = '<div class="empty">Ma\'lumot yo\'q</div>'; return; }
+  const leads = S.L.leads.filter(l=>l.lat), near = g => leads.filter(l => hav(g.lat,g.lon,l.lat,l.lon) <= 5);
+  const all = S.N.gaps.map((g,i) => ({...g, i}));
+  const byH = countBy(all, g=>g.hudud);
+  const list = S.gapHud ? all.filter(g => g.hudud === S.gapHud) : all;
+  const max = Math.max(...all.map(g=>g.aholi_3km));
+  const ming = n => n >= 1000 ? `${Math.round(n/1000)} ming` : n;
+  const name = g => g.joy && /tuman|shahri/i.test(g.joy) ? g.joy : [g.hudud, g.joy].filter(Boolean).join(", ");
+  $("#p-gaps").innerHTML = `
+    <div class="gintro">
+      <div class="mono">Bo'sh hududlar</div>
+      <h5>Odam ko'p yashaydi, lekin filialimiz uzoq — shu joylarga yangi filial kerak</h5>
+      <div class="gsteps">
+        <div><i>👥</i><b>Odam ko'p</b><span>atrofida o'n minglab odam yashaydi</span></div>
+        <div class="arr">+</div>
+        <div><i>📍</i><b>Filial uzoq</b><span>eng yaqin filialimiz ${S.N.summary.gap_km} km dan ham uzoqda</span></div>
+        <div class="arr">=</div>
+        <div class="ok"><i>➕</i><b>Yangi filial uchun joy</b><span>bu yerda ochilsa, mijoz ko'p bo'ladi</span></div>
+      </div>
+      <div class="gnote">Ro'yxat eng muhimidan boshlanadi: qancha ko'p odam yashasa, shuncha yuqorida. Raqamlar aholi xaritasidan (2020) olingan, taxminiy —
+        ochishdan oldin joyni o'zingiz ko'rib chiqing.</div>
+    </div>
+    <div class="chips" style="padding:14px 0;border:0">
+      <button class="chip ${!S.gapHud?"on":""}" data-gh="">Hammasi <b>${all.length}</b></button>
+      ${byH.map(([h,n])=>`<button class="chip ${S.gapHud===h?"on":""}" data-gh="${esc(h)}">${esc(h)} <b>${n}</b></button>`).join("")}
+    </div>
+    <div class="gcards">${list.map(g => { const nl = near(g); return `
+      <div class="gcard">
+        <div class="gtop"><span class="grank">${g.i+1}</span><div><div class="gname">${esc(name(g))}</div><div class="ghud">${esc(g.hudud)}</div></div></div>
+        <div class="gbig">👥 ~${ming(g.aholi_3km)} odam <span>yashaydi (3 km atrofida)</span></div>
+        <div class="gbar"><span style="width:${Math.max(4, g.aholi_3km/max*100)}%"></span></div>
+        <div class="grow">📍 Eng yaqin filialimiz: <b>${esc(g.eng_yaqin)}</b> — <b>${g.masofa_km} km</b> uzoqda</div>
+        ${g.yopilgan_yaqin?`<div class="grow" style="color:var(--red)">⚠️ Yaqinida yopilgan filial bor: ${esc(g.yopilgan_yaqin)}</div>`:""}
+        <div class="grow">🙋 Shu joydan arizalar: ${nl.length ? nl.map(l=>`<a href="#" data-lead="${l.id}">${esc(l.name)}</a>`).join(", ") : '<span style="color:var(--muted)">hali yo\'q</span>'}</div>
+        <div class="acts" style="margin-top:10px"><button class="abtn" data-gap="${g.i}">🗺 Xaritada</button>
+          <a class="abtn" target="_blank" href="https://maps.google.com/?q=${g.lat},${g.lon}">Google ↗</a>
+          <button class="abtn pri" data-newb="${g.i}">＋ Filial ochish</button></div>
+      </div>`; }).join("")}</div>`;
+  document.querySelectorAll("[data-gh]").forEach(b => b.onclick = () => { S.gapHud = b.dataset.gh; renderGaps(); });
+  document.querySelectorAll("[data-gap]").forEach(b => b.onclick = () => { const g = S.N.gaps[+b.dataset.gap]; $("#lyGaps").checked = true;
+    flyTo(g.lat, g.lon, 13, `<b>Bo'sh hudud #${+b.dataset.gap+1}</b> — ${esc(name(g))}<br>~${ming(g.aholi_3km)} odam (3 km atrofida)`); });
+  document.querySelectorAll("[data-newb]").forEach(b => b.onclick = () => { const g = S.N.gaps[+b.dataset.newb];
+    openBranchModal(null, {hudud:g.hudud, lat:g.lat, lng:g.lon, izoh:`Bo'sh hudud #${+b.dataset.newb+1}: ${name(g)}`}); });
+  document.querySelectorAll("#p-gaps [data-lead]").forEach(a => a.onclick = e => { e.preventDefault(); openLeadFromAnywhere(+a.dataset.lead); });
+}
+
+/* ---------- xarita ---------- */
+let map, ly = {}, bMarkers = [], mapDirty = true, FM = {regs:null, distOn:false, distPick:[], pickOn:false};
+function bMatch(b){
+  const q = $("#fq").value.toLowerCase().trim(), x = $("#fExtra").value;
+  if (isAct(b) && !$("#fAct").checked) return false;
+  if (!isAct(b) && !$("#fCl").checked) return false;
+  if (FM.regs && !FM.regs.has(b.hudud)) return false;
+  if (x === "ijara" && b.ijara !== "Bor") return false;
+  if (x === "banner" && b.banner !== "Bor") return false;
+  if (x === "nobanner" && b.banner === "Bor") return false;
+  if (x === "izoh" && !b.izoh) return false;
+  if (q && ![b.nomi,b.mrk,b.address,b.landmark,b.manager,b.phone1,b.phone2,b.izoh,b.hudud].join(" ").toLowerCase().includes(q)) return false;
+  return true;
+}
+function bPopup(b){
+  const row = (k, v) => v ? `<div><span class="r">${k}:</span> ${v}</div>` : "";
+  return `<div class="bpop"><b class="t">${esc(b.nomi)}</b> <span class="st" style="background:var(${isAct(b)?"--green":"--red"});padding:1px 7px;font-size:11px">${esc(b.status)}</span>
+    <div class="r">${esc(b.mrk||"")} · ${esc(b.hudud)}</div>${row("Manzil", esc(b.address))}${row("Mo'ljal", esc(b.landmark))}
+    ${row("Menejer", esc(b.manager))}${row("Telefon", esc([b.phone1,b.phone2].filter(Boolean).join(", ")))}${row("Ochilgan", fmtDate(b.ochilgan))}
+    ${row("Aholi 3 km", b.aholi_3km!=null ? (b.aholi_3km/1000).toFixed(0)+" ming" : "")}${row("Eng yaqin aktiv", b.qoshni ? `${esc(b.qoshni)} — ${b.qoshni_km} km` : "")}${row("Izoh", esc(b.izoh))}
+    <div style="margin-top:6px;display:flex;gap:8px"><a href="#" onclick="openBranchCard('${esc(b.id)}');return false">Kartochka →</a><a href="#" onclick="openBranchModal(S.N.branches.find(x=>String(x.id)==='${esc(b.id)}'));return false">✏️ Tahrirlash</a><a href="https://maps.google.com/?q=${b.lat},${b.lng}" target="_blank">Google ↗</a></div></div>`;
+}
+/* Xarita foni: Esri World Street Map (kalit talab qilmaydi). Yuklanmasa — avtomatik OpenStreetMap'ga o'tadi */
+function baseLayer(){
+  const esri = L.tileLayer("https://server.arcgisonline.com/ArcGIS/rest/services/World_Street_Map/MapServer/tile/{z}/{y}/{x}",
+    {maxZoom:19, maxNativeZoom:19, attribution:"Tiles &copy; Esri — Esri, HERE, Garmin, &copy; OpenStreetMap contributors"});
+  let errors = 0, swapped = false;
+  esri.on("tileerror", () => {
+    if (swapped || ++errors < 6) return;
+    swapped = true;
+    const m = esri._map; if (!m) return;
+    m.removeLayer(esri);
+    L.tileLayer("https://tile.openstreetmap.org/{z}/{x}/{y}.png", {maxZoom:19, attribution:"&copy; OpenStreetMap contributors"}).addTo(m).bringToBack();
+  });
+  return esri;
+}
+const PIN_GREEN = "#1e9e50", PIN_RED = "#d92d2d";
+function bIcon(b){
+  const c = isAct(b) ? PIN_GREEN : PIN_RED;
+  return L.divIcon({className:"", iconSize:[26,34], iconAnchor:[13,34], popupAnchor:[0,-30],
+    html:`<svg width="26" height="34" viewBox="0 0 24 32"><path d="M12 0C5.4 0 0 5.4 0 12c0 9 12 20 12 20s12-11 12-20c0-6.6-5.4-12-12-12z" fill="${c}" stroke="#fff" stroke-width="1.5"/><circle cx="12" cy="12" r="4.5" fill="#fff"/></svg>`});
+}
+// Gul shaklidagi yumshoq guruh belgisi (doiralar blur+kontrast filtri bilan qo'shib yuboriladi)
+let gooId = 0;
+function blobIcon(n, act, size){
+  const rgb = act === n ? "30,158,80" : act === 0 ? "217,45,45" : "120,126,138";
+  const id = "goo" + (gooId++);
+  return `<div style="position:relative;width:${size}px;height:${size}px" title="${act} aktiv · ${n-act} yopilgan — bosing, yaqinlashadi">
+    <svg width="${size}" height="${size}" viewBox="0 0 100 100" style="position:absolute;inset:0">
+      <filter id="${id}"><feGaussianBlur in="SourceGraphic" stdDeviation="6" result="b"/><feColorMatrix in="b" mode="matrix" values="1 0 0 0 0  0 1 0 0 0  0 0 1 0 0  0 0 0 20 -8"/></filter>
+      <g filter="url(#${id})" fill="rgba(${rgb},.9)"><circle cx="50" cy="50" r="26"/><circle cx="50" cy="22" r="15"/><circle cx="76" cy="36" r="15"/>
+        <circle cx="76" cy="64" r="15"/><circle cx="50" cy="78" r="15"/><circle cx="24" cy="64" r="15"/><circle cx="24" cy="36" r="15"/></g></svg></div>`;
+}
+function initMap(){
+  map = L.map("map").setView([41.2, 64.6], 6);
+  baseLayer().addTo(map);
+  const clusterIcon = cl => { const ms = cl.getAllChildMarkers(), n = ms.length, act = ms.filter(m => m.options.act).length;
+    const size = n < 10 ? 40 : n < 50 ? 46 : 54, ring = act === n ? PIN_GREEN : act === 0 ? PIN_RED : "#9a9ca3";
+    return L.divIcon({className:"", iconSize:L.point(size,size),
+      html:`<div class="mcl2" style="width:${size}px;height:${size}px;border:3px solid ${ring}" title="${act} aktiv · ${n-act} yopilgan">${n}</div>`}); };
+  ly.branchesCl = L.markerClusterGroup ? L.markerClusterGroup({showCoverageOnHover:false, spiderfyOnMaxZoom:true, maxClusterRadius:45, disableClusteringAtZoom:15, iconCreateFunction:clusterIcon}) : L.layerGroup();
+  ly.branches = L.layerGroup();
+  ["cover","gaps","leads","dist","site"].forEach(k => ly[k] = L.layerGroup().addTo(map));
+  ly.zones = L.layerGroup().addTo(map); zoneRenderer = L.canvas({padding:0.3});
+  ly.zones.setZIndex && ly.zones.setZIndex(200);
+  map.on("moveend", () => { clearTimeout(zoneTimer); zoneTimer = setTimeout(loadZones, 250); });
+  $("#lyZones").addEventListener("input", () => { syncLayers(); loadZones(); });
+  ["#fq","#fAct","#fCl","#fExtra","#lyCluster"].forEach(s => $(s).addEventListener("input", () => { drawBranches(); searchList(); }));
+  ["#lyLeads","#lyGaps","#lyCover"].forEach(s => $(s).addEventListener("input", syncLayers));
+  $("#fRegAll").onclick = () => { FM.regs = null; renderRegs(); drawBranches(); };
+  $("#fRegNone").onclick = () => { FM.regs = new Set(); renderRegs(); drawBranches(); };
+  $("#fDist").onclick = () => { FM.distOn = !FM.distOn; FM.distPick = []; $("#fDist").textContent = FM.distOn ? "Yoqilgan — 2 filialni bosing" : "O'lchashni yoqish"; $("#fDist").classList.toggle("pri", FM.distOn); };
+  $("#fDistClr").onclick = () => { ly.dist.clearLayers(); FM.distPick = []; $("#fDistRes").innerHTML = ""; $("#fDistClr").classList.add("hidden"); };
+  $("#fPick").onclick = () => { FM.pickOn = !FM.pickOn; $("#fPick").classList.toggle("pri", FM.pickOn); $("#fPick").textContent = FM.pickOn ? "Xaritani bosing..." : "📍 Xaritadan belgilash"; };
+  map.on("click", e => { if (!FM.pickOn) return; FM.pickOn = false; $("#fPick").classList.remove("pri"); $("#fPick").textContent = "📍 Xaritadan belgilash"; evalPoint({lat:e.latlng.lat, lon:e.latlng.lng}); });
+  $("#fLLgo").onclick = () => { const v = $("#fLL").value.trim(), m = v.match(/(-?\d+\.\d+)\s*[,; ]\s*(-?\d+\.\d+)/);
+    if (m && !/^https?:/.test(v)) evalPoint({lat:+m[1], lon:+m[2]}); else if (v) evalPoint({url:v}); };
+  $("#fLL").addEventListener("keydown", e => { if (e.key === "Enter") $("#fLLgo").click(); });
+  window.addEventListener("resize", () => map.invalidateSize());
+}
+function renderRegs(){
+  const all = S.N.branches.filter(b=>b.lat), hs = [...new Set(all.map(b=>b.hudud))].sort();
+  $("#fRegs").innerHTML = hs.map(h => { const n = all.filter(b=>b.hudud===h), a = n.filter(isAct).length;
+    return `<label><input type="checkbox" data-h="${esc(h)}" ${!FM.regs || FM.regs.has(h) ? "checked" : ""}><span>${esc(h)}</span><small>${a} / ${n.length}</small></label>`; }).join("");
+  document.querySelectorAll("#fRegs input").forEach(c => c.onchange = () => {
+    if (!FM.regs) FM.regs = new Set(hs);
+    c.checked ? FM.regs.add(c.dataset.h) : FM.regs.delete(c.dataset.h);
+    if (FM.regs.size === hs.length) FM.regs = null;
+    drawBranches();
+  });
+}
+function drawBranches(){
+  ly.branchesCl.clearLayers(); ly.branches.clearLayers(); ly.cover.clearLayers(); bMarkers = [];
+  const vis = S.N.branches.filter(b => b.lat && bMatch(b)), group = $("#lyCluster").checked ? ly.branchesCl : ly.branches;
+  const markers = vis.map(b => {
+    const m = L.marker([b.lat,b.lng], {icon:bIcon(b), act:isAct(b), title:b.nomi}).bindPopup(bPopup(b), {maxWidth:330});
+    m.on("click", () => distClick(b, m)); m._b = b; bMarkers.push(m);
+    if (isAct(b)) L.circle([b.lat,b.lng], {radius:3000, color:cssv("--green"), weight:0, fillOpacity:.08, interactive:false}).addTo(ly.cover);
+    return m;
+  });
+  if (group.addLayers) group.addLayers(markers); else markers.forEach(m => m.addTo(group));
+  map.removeLayer(ly.branchesCl); map.removeLayer(ly.branches); group.addTo(map);
+  $("#fsAct").textContent = vis.filter(isAct).length; $("#fsCl").textContent = vis.filter(b=>!isAct(b)).length;
+  $("#fsAll").textContent = `${vis.length} / ${S.N.branches.length}`;
+  syncLayers();
+}
+function searchList(){
+  const q = $("#fq").value.trim();
+  if (q.length < 2) { $("#fqRes").innerHTML = ""; return; }
+  const res = S.N.branches.filter(b => b.lat && bMatch(b)).slice(0, 30);
+  $("#fqRes").innerHTML = res.map(b => `<div data-id="${esc(b.id)}"><b>${esc(b.nomi)}</b> <span class="mini x-${isAct(b)?"ok":"bad"}">${esc(b.status)}</span><small>${esc(b.hudud)} · ${esc(b.manager||"")}</small></div>`).join("") || '<div>Topilmadi</div>';
+  document.querySelectorAll("#fqRes [data-id]").forEach(el => el.onclick = () => focusBranch(el.dataset.id));
+}
+function focusBranch(id){
+  const m = bMarkers.find(x => String(x._b.id) === String(id)); if (!m) return;
+  if ($("#lyCluster").checked && ly.branchesCl.zoomToShowLayer) ly.branchesCl.zoomToShowLayer(m, () => m.openPopup()); else { map.setView(m.getLatLng(), 15); m.openPopup(); }
+}
+function distClick(b, m){
+  if (!FM.distOn) return;
+  m.closePopup(); FM.distPick.push(b);
+  if (FM.distPick.length === 1) { $("#fDistRes").innerHTML = `1-filial: <b>${esc(b.nomi)}</b>. Endi ikkinchisini bosing.`; return; }
+  const [a, c] = FM.distPick; FM.distPick = []; const km = hav(a.lat, a.lng, c.lat, c.lng);
+  L.polyline([[a.lat,a.lng],[c.lat,c.lng]], {color:cssv("--teal"), weight:3, dashArray:"6,6"}).addTo(ly.dist);
+  L.marker([(a.lat+c.lat)/2, (a.lng+c.lng)/2], {icon:L.divIcon({className:"", html:`<span class="distlbl">${km.toFixed(2)} km</span>`, iconSize:null}), interactive:false}).addTo(ly.dist);
+  $("#fDistRes").innerHTML = `<b>${esc(a.nomi)}</b> ↔ <b>${esc(c.nomi)}</b>: <b>${km.toFixed(2)} km</b>`; $("#fDistClr").classList.remove("hidden");
+}
+async function evalPoint(body){
+  $("#fEval").innerHTML = '<div style="color:var(--muted)">Tekshirilmoqda...</div>';
+  const r = await fetch("/api/evaluate", {method:"POST", headers:{"Content-Type":"application/json"}, body:JSON.stringify(body)}); const j = await r.json();
+  if (!j.ok) { $("#fEval").innerHTML = `<div class="verd x-bad">${esc(j.error)}</div>`; return; }
+  ly.site.clearLayers();
+  L.circleMarker([j.lat,j.lon], {radius:9, color:"#fff", weight:3, fillColor:cssv("--teal"), fillOpacity:1}).addTo(ly.site);
+  L.circle([j.lat,j.lon], {radius:j.radius.tuman*1000, color:cssv("--teal"), weight:1, dashArray:"4,4", fill:false, interactive:false}).addTo(ly.site);
+  j.yaqin.slice(0,3).forEach(n => L.polyline([[j.lat,j.lon],[n.lat,n.lng]], {color:cssv("--orange"), weight:2.5, dashArray:"6,6"}).addTo(ly.site));
+  map.setView([j.lat,j.lon], Math.max(map.getZoom(), 12));
+  const v = ([x, why], label) => `<div class="verd x-${x.startsWith("✅")?"ok":x.startsWith("⚠")?"warn":"bad"}"><b>${label}: ${esc(x)}</b><br>${esc(why)}</div>`;
+  $("#fEval").innerHTML = v(j.shahar, `Shahar (${j.radius.shahar} km)`) + v(j.tuman, `Tuman (${j.radius.tuman} km)`) +
+    `<div style="font-size:12.5px">👥 Aholi: <b>${esc(j.daraja)}</b>${j.zichlik?` (~${j.zichlik} kishi/km²)`:""}</div>
+     <div style="font-size:12.5px;margin-top:4px">📏 Eng yaqin aktiv filiallar:<br>${j.yaqin.map(n=>`• ${esc(n.nomi)} — <b>${n.km} km</b>`).join("<br>")}</div>
+     ${j.lidlar.length?`<div style="font-size:12.5px;margin-top:4px">🙋 5 km ichidagi arizalar: ${j.lidlar.map(l=>`<a href="#" data-lead="${l.id}">${esc(l.name)}</a> (${l.km} km)`).join(", ")}</div>`:""}
+     <div style="margin-top:8px;display:flex;gap:6px;flex-wrap:wrap"><button class="abtn pri" id="fEvalAdd">＋ Shu yerga filial</button><a class="abtn" href="https://maps.google.com/?q=${j.lat},${j.lon}" target="_blank">Google ↗</a><button class="abtn" id="fEvalClr">Tozalash</button></div>`;
+  $("#fEvalClr").onclick = () => { ly.site.clearLayers(); $("#fEval").innerHTML = ""; };
+  $("#fEvalAdd").onclick = () => openBranchModal(null, {lat:j.lat.toFixed(6), lng:j.lon.toFixed(6), locationUrl:`https://maps.google.com/?q=${j.lat.toFixed(6)},${j.lon.toFixed(6)}`});
+  document.querySelectorAll("#fEval [data-lead]").forEach(a => a.onclick = e => { e.preventDefault(); openLeadFromAnywhere(+a.dataset.lead); });
+}
+function leadIcon(){
+  return L.divIcon({className:"", iconSize:[20,20], iconAnchor:[10,10], popupAnchor:[0,-9],
+    html:'<div class="lmark"><span class="lpulse"></span><span class="ldot"></span></div>'});
+}
+let zoneRenderer, zoneTimer, zoneSeq = 0;
+const ZSTYLE = {tavsiya:{fillColor:"#9b6bff", fillOpacity:.38}, orta:{fillColor:"#c9b0ff", fillOpacity:.32}, band:{fillColor:"#7d7f87", fillOpacity:.42}};
+async function loadZones(){
+  if (!map || !$("#lyZones").checked) { ly.zones && ly.zones.clearLayers(); $("#zHint").textContent = ""; return; }
+  if (map.getZoom() < 11) { ly.zones.clearLayers(); $("#zHint").textContent = "🔍 Zonalarni ko'rish uchun xaritani shahar darajasigacha yaqinlashtiring"; return; }
+  const b = map.getBounds(), my = ++zoneSeq;
+  const r = await fetch(`/api/zones?s=${b.getSouth()}&w=${b.getWest()}&n=${b.getNorth()}&e=${b.getEast()}`);
+  const j = await r.json(); if (my !== zoneSeq) return;
+  ly.zones.clearLayers();
+  if (j.too_big) { $("#zHint").textContent = "🔍 Zonalarni ko'rish uchun biroz yaqinlashtiring"; return; }
+  $("#zHint").textContent = "";
+  const R = j.r, ang = [30,90,150,210,270,330].map(d => d * Math.PI / 180);
+  j.hex.forEach(([la, lo, c, d, km, lim]) => {
+    const cx = lo * j.kx, cy = la * j.ky;
+    const pts = ang.map(a => [(cy + R * Math.sin(a)) / j.ky, (cx + R * Math.cos(a)) / j.kx]);
+    const txt = c === "band"
+      ? `<b>Filial ochib bo'lmaydi</b><br>Eng yaqin aktiv filial ${km} km — qoida bo'yicha kamida ${lim} km bo'lishi kerak`
+      : `<b>${c === "tavsiya" ? "Tavsiya etilgan zona" : "Mumkin bo'lgan zona (aholi o'rtacha)"}</b><br>Aholi: ~${d} kishi/km²<br>Eng yaqin aktiv filial: ${km} km`;
+    L.polygon(pts, {renderer: zoneRenderer, color:"#fff", weight:1, ...ZSTYLE[c]})
+      .bindPopup(txt + `<br><a href="#" onclick="evalPoint({lat:${la},lon:${lo}});return false">Shu joyni baholash →</a>`).addTo(ly.zones);
+  });
+}
+function renderMap(){
+  if (!window.L) { $("#map").innerHTML = '<div class="empty">Xarita yuklanmadi (internet kerak)</div>'; return; }
+  if (!S.N) { $("#map").innerHTML = '<div class="empty">Filiallar ma\'lumoti o\'qilmadi</div>'; return; }
+  if (!map) initMap();
+  renderRegs(); drawBranches();
+  ly.gaps.clearLayers(); ly.leads.clearLayers();
+  S.N.gaps.forEach((g,i) => {
+    const nm = g.joy && /tuman|shahri/i.test(g.joy) ? g.joy : [g.hudud, g.joy].filter(Boolean).join(", ");
+    const pop = `<b>Bo'sh hudud #${i+1}</b> — ${esc(nm)}<br><span style="color:#6b7280;font-size:12px">#${i+1} — "Bo'sh hududlar" ro'yxatidagi o'rni (odam soni bo'yicha)</span><br><span style="color:#6b7280">${esc(g.hudud)}</span><br>👥 ~${(g.aholi_3km/1000).toFixed(0)} ming odam (3 km atrofida)<br>📍 Eng yaqin filial: ${esc(g.eng_yaqin)} — ${g.masofa_km} km`;
+    L.circle([g.lat,g.lon], {radius:3000, color:"#ea580c", weight:2, dashArray:"6,5", fillColor:"#fdba74", fillOpacity:.32}).bindPopup(pop).addTo(ly.gaps);
+    L.marker([g.lat,g.lon], {zIndexOffset:500, title:`Bo'sh hudud #${i+1}: ${nm}`, icon:L.divIcon({className:"", iconSize:[34,24], iconAnchor:[17,12], popupAnchor:[0,-12],
+      html:`<div class="gmark">#${i+1}</div>`})}).bindPopup(pop).addTo(ly.gaps);
+  });
+  const xc = {ok:"--green", warn:"--orange", bad:"--red", draft:"--gray"};
+  S.L.leads.filter(l=>l.lat).forEach(l => L.marker([l.lat,l.lon], {icon: leadIcon(), zIndexOffset: 1000, title: l.name})
+    .bindPopup(`<b>Ariza: ${esc(l.name)}</b><br>${esc(l.viloyat)}, ${esc(l.tuman)}<br>${esc(l.xulosa)} · ${esc(l.status)}<br><a href="#" onclick="openLeadFromAnywhere(${l.id});return false">Kartochkani ochish →</a>`).addTo(ly.leads));
+  syncLayers(); mapDirty = false; loadZones();
+  setTimeout(() => map.invalidateSize(), 120);
+}
+function syncLayers(){ if (!map) return; [["lyCover","cover"],["lyGaps","gaps"],["lyLeads","leads"],["lyZones","zones"]].forEach(([id,k]) => { if ($("#"+id).checked) ly[k].addTo(map); else map.removeLayer(ly[k]); }); }
+function flyTo(lat, lon, z, html){ setTab("xarita"); setTimeout(() => { map.setView([lat,lon], z); L.popup().setLatLng([lat,lon]).setContent(html).openOn(map); }, 250); }
+function openLeadFromAnywhere(id){ S.sel = id; S.kpi = ""; S.status = ""; setTab("arizalar"); renderAll(); document.querySelector(`#rows .lr[data-id="${id}"]`)?.scrollIntoView({block:"center"}); }
+function openBranchCard(id){ S.bsel = id; S.kpi = ""; S.bchip = ""; setTab("filiallar"); renderBRows(); renderBDetail(); document.querySelector(`#brows .lr[data-id="${id}"]`)?.scrollIntoView({block:"center"}); }
+
+/* ---------- tabs ---------- */
+function setTab(t){
+  S.tab = t;
+  document.querySelectorAll(".tab").forEach(b => b.classList.toggle("on", b.dataset.p===t));
+  document.querySelectorAll(".pane").forEach(p => p.classList.toggle("on", p.id==="p-"+t));
+  $("#workB").classList.toggle("hidden", t !== "filiallar");
+  $("#work").classList.toggle("hidden", t !== "arizalar");
+  if (S.N && t==="filiallar") { renderBChips(); renderBRows(); renderBDetail(); }
+  if (t==="arizalar") { renderViews(); renderChips(); renderRows(); renderDetail(); }
+  if (t==="tahlil") renderTahlil(); if (t==="gaps") renderGaps();
+  if (t==="xarita") { if (!map || mapDirty) renderMap(); else setTimeout(() => map.invalidateSize(), 100); }
+}
+document.querySelectorAll(".tab").forEach(b => b.onclick = () => setTab(b.dataset.p));
+document.addEventListener("keydown", e => { if (e.key === "Escape") closeModal(); });
+$("#reload").onclick = async () => { await load(true); toast("Yangilandi"); };
+load(true);
+setInterval(() => { if (!document.hidden && !S.dirty && !$("#modal").classList.contains("on") && ["arizalar"].includes(S.tab)) load(); }, 30000);
+</script>
+</body>
+</html>

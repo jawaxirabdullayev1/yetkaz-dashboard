@@ -1,0 +1,422 @@
+{
+ "41.1954,69.2529": {
+  "hudud": "Toshkent shahri",
+  "joy": "Zangiota tumani, Honobodtepa"
+ },
+ "41.1371,69.1946": {
+  "hudud": "Toshkent viloyati",
+  "joy": "Quyichirchiq tumani, Qizil Sharq"
+ },
+ "41.1287,69.2946": {
+  "hudud": "Toshkent viloyati",
+  "joy": "O'rtachirchiq tumani, Chibintepa"
+ },
+ "41.2287,69.3446": {
+  "hudud": "Toshkent shahri",
+  "joy": "Ustozlar"
+ },
+ "39.6954,66.9779": {
+  "hudud": "Samarqand",
+  "joy": "Samarqand shahri"
+ },
+ "39.6037,66.9696": {
+  "hudud": "Samarqand",
+  "joy": "Samarqand tumani, Ko'saho"
+ },
+ "38.3954,67.9696": {
+  "hudud": "Surxondaryo",
+  "joy": "Sariosiyo tumani"
+ },
+ "39.6454,67.0529": {
+  "hudud": "Samarqand",
+  "joy": "Toyloq tumani, Madaniyat"
+ },
+ "39.6538,66.8529": {
+  "hudud": "Samarqand",
+  "joy": "Past Dargʻom tumani, Miyonqov"
+ },
+ "40.6538,72.2446": {
+  "hudud": "Andijon",
+  "joy": "Asaka tumani, Асака"
+ },
+ "40.7537,72.4112": {
+  "hudud": "Andijon",
+  "joy": "Andijon tumani, Jevachi"
+ },
+ "40.8454,72.3113": {
+  "hudud": "Andijon",
+  "joy": "Andijon tumani, Qo`shariq"
+ },
+ "39.0538,66.8279": {
+  "hudud": "Qashqadaryo",
+  "joy": "Shahrisabz shahri, Китоб"
+ },
+ "41.5204,60.5946": {
+  "hudud": "Xorazm",
+  "joy": "Urganch tumani, G'aybu"
+ },
+ "39.6871,66.7446": {
+  "hudud": "Samarqand",
+  "joy": "Past Dargʻom tumani, Ravot"
+ },
+ "40.7037,72.0613": {
+  "hudud": "Andijon",
+  "joy": "Shahrixon tumani"
+ },
+ "37.2871,67.3612": {
+  "hudud": "Surxondaryo",
+  "joy": "Termiz tumani, Salovot"
+ },
+ "40.4787,70.9363": {
+  "hudud": "Farg'ona Viloyati",
+  "joy": "Oʻzbekiston tumani, Kulelash"
+ },
+ "39.5704,67.0529": {
+  "hudud": "Samarqand",
+  "joy": "Toyloq tumani, Ilmobod"
+ },
+ "40.3787,71.4696": {
+  "hudud": "Farg'ona Viloyati",
+  "joy": "Oltiariq tumani, Yangiqurgon"
+ },
+ "40.4787,71.8029": {
+  "hudud": "Farg'ona Viloyati",
+  "joy": "Toshloq tumani, Teraktagi"
+ },
+ "41.3871,60.3362": {
+  "hudud": "Xorazm",
+  "joy": "Xiva tumani, Шиклар"
+ },
+ "40.2454,71.5529": {
+  "hudud": "Farg'ona Viloyati",
+  "joy": "Fargʻona tumani, Mindon"
+ },
+ "40.4954,71.0362": {
+  "hudud": "Farg'ona Viloyati",
+  "joy": "Uchkoʻprik tumani, Bekobod"
+ },
+ "38.6121,66.2613": {
+  "hudud": "Qashqadaryo",
+  "joy": "Gʻuzor tumani"
+ },
+ "37.8287,67.5863": {
+  "hudud": "Surxondaryo",
+  "joy": "Qumqoʻrgʻon tumani, Yangi shahar"
+ },
+ "41.4704,60.7612": {
+  "hudud": "Xorazm",
+  "joy": "Xonqa tumani, Madaniy er"
+ },
+ "38.9038,65.7696": {
+  "hudud": "Qashqadaryo",
+  "joy": "Qarshi tumani, Pistakent"
+ },
+ "40.6871,72.5196": {
+  "hudud": "Andijon",
+  "joy": "Xoʻjaobod tumani, Koʻtarma"
+ },
+ "39.7537,66.9196": {
+  "hudud": "Samarqand",
+  "joy": "Oqdaryo tumani, Chorjo'y"
+ },
+ "40.3371,71.8113": {
+  "hudud": "Farg'ona Viloyati",
+  "joy": "Fargʻona tumani, Yangi Asr mahallasi"
+ },
+ "40.7204,72.6363": {
+  "hudud": "Andijon",
+  "joy": "Jalaquduq tumani, Jalaquduq"
+ },
+ "41.5954,60.5779": {
+  "hudud": "Xorazm",
+  "joy": "Urganch tumani, Oʻrtadoʻrmon"
+ },
+ "40.7287,72.2362": {
+  "hudud": "Andijon",
+  "joy": "Asaka tumani, Qipchoq"
+ },
+ "40.9204,72.3446": {
+  "hudud": "Andijon",
+  "joy": "Izboskan tumani, Uzun Koʻcha"
+ },
+ "40.3621,70.7862": {
+  "hudud": "Farg'ona Viloyati",
+  "joy": "Oʻzbekiston tumani, Qo'rg'oncha"
+ },
+ "41.0538,71.8612": {
+  "hudud": "Namangan Viloyati",
+  "joy": "Chortoq tumani, Короскон"
+ },
+ "41.1954,71.5113": {
+  "hudud": "Namangan Viloyati",
+  "joy": "Kosonsoy tumani, Goʻrmiron"
+ },
+ "40.0871,64.7029": {
+  "hudud": "Buxoro",
+  "joy": "G'ijduvon tumani, Ko'shki Poyon"
+ },
+ "38.8704,65.8529": {
+  "hudud": "Qashqadaryo",
+  "joy": "Qarshi tumani, Bog'obod"
+ },
+ "39.6954,66.9862": {
+  "hudud": "Samarqand",
+  "joy": "Samarqand shahri"
+ },
+ "39.6371,67.0613": {
+  "hudud": "Samarqand",
+  "joy": "Toyloq tumani, Madaniyat"
+ },
+ "39.6454,66.8529": {
+  "hudud": "Samarqand",
+  "joy": "Samarqand tumani, Turkmanqishloq"
+ },
+ "40.7454,72.4112": {
+  "hudud": "Andijon",
+  "joy": "Andijon tumani, Jevachi"
+ },
+ "40.4787,71.8113": {
+  "hudud": "Farg'ona Viloyati",
+  "joy": "Toshloq tumani, Teraktagi"
+ },
+ "40.6788,72.5113": {
+  "hudud": "Andijon",
+  "joy": "Xoʻjaobod tumani, Garaguri"
+ },
+ "39.5621,67.0529": {
+  "hudud": "Samarqand",
+  "joy": "Toyloq tumani, Ilmobod"
+ },
+ "38.9121,65.7696": {
+  "hudud": "Qashqadaryo",
+  "joy": "Qarshi tumani, Pistakent"
+ },
+ "40.7204,72.6279": {
+  "hudud": "Andijon",
+  "joy": "Jalaquduq tumani, Jalaquduq"
+ },
+ "41.1871,71.5113": {
+  "hudud": "Namangan Viloyati",
+  "joy": "Kosonsoy tumani, Goʻrmiron"
+ },
+ "41.0621,71.8612": {
+  "hudud": "Namangan Viloyati",
+  "joy": "Chortoq tumani, Короскон"
+ },
+ "41.1958,69.2458": {
+  "hudud": "Toshkent shahri",
+  "joy": "Binokor"
+ },
+ "41.2375,69.3292": {
+  "hudud": "Toshkent shahri",
+  "joy": "Bektemir"
+ },
+ "41.1375,69.3042": {
+  "hudud": "Toshkent viloyati",
+  "joy": "O'rtachirchiq tumani, Chibintepa"
+ },
+ "41.1375,69.1875": {
+  "hudud": "Toshkent viloyati",
+  "joy": "Quyichirchiq tumani, Qizil Sharq"
+ },
+ "40.7042,72.0542": {
+  "hudud": "Andijon",
+  "joy": "Shahrixon tumani"
+ },
+ "41.3208,69.1958": {
+  "hudud": "Toshkent shahri",
+  "joy": ""
+ },
+ "40.7292,72.3542": {
+  "hudud": "Andijon",
+  "joy": "Andijon tumani, Chem"
+ },
+ "40.6625,72.2292": {
+  "hudud": "Andijon",
+  "joy": "Asaka tumani, Асака"
+ },
+ "41.3875,69.2375": {
+  "hudud": "Toshkent shahri",
+  "joy": ""
+ },
+ "39.6042,66.9708": {
+  "hudud": "Samarqand",
+  "joy": "Samarqand tumani, Ko'saho"
+ },
+ "39.0625,66.8375": {
+  "hudud": "Qashqadaryo",
+  "joy": "Shahrisabz tumani, Китоб"
+ },
+ "40.3792,71.4625": {
+  "hudud": "Farg'ona Viloyati",
+  "joy": "Oltiariq tumani, Yangiqurgon"
+ },
+ "40.3625,70.7792": {
+  "hudud": "Farg'ona Viloyati",
+  "joy": "Oʻzbekiston tumani, Qo'rg'oncha"
+ },
+ "40.6208,72.4792": {
+  "hudud": "Andijon",
+  "joy": "Buloqboshi tumani"
+ },
+ "41.3375,69.3292": {
+  "hudud": "Toshkent shahri",
+  "joy": "Qorasuv"
+ },
+ "40.3958,71.2708": {
+  "hudud": "Farg'ona Viloyati",
+  "joy": "Rishton tumani, Zoxidon"
+ },
+ "39.6792,66.7292": {
+  "hudud": "Samarqand",
+  "joy": "Past Dargʻom tumani, Ag'ron"
+ },
+ "41.3042,61.1042": {
+  "hudud": "Xorazm",
+  "joy": "Hazorasp tumani"
+ },
+ "40.6042,72.1542": {
+  "hudud": "Andijon",
+  "joy": "Asaka tumani, Kungirot"
+ },
+ "39.6958,66.9792": {
+  "hudud": "Samarqand",
+  "joy": "Samarqand shahri"
+ },
+ "40.5125,71.6792": {
+  "hudud": "Farg'ona Viloyati",
+  "joy": "Qoʻshtepa tumani, Beshkapa"
+ },
+ "40.2375,71.5625": {
+  "hudud": "Farg'ona Viloyati",
+  "joy": "Fargʻona tumani, Mindon"
+ },
+ "41.4792,60.7792": {
+  "hudud": "Xorazm",
+  "joy": "Xonqa tumani, Madaniy er"
+ },
+ "40.5292,71.1292": {
+  "hudud": "Farg'ona Viloyati",
+  "joy": "Bagʻdod tumani, Olchin"
+ },
+ "40.4375,70.6208": {
+  "hudud": "Farg'ona Viloyati",
+  "joy": "Beshariq tumani, Saritаl"
+ },
+ "40.8125,72.2708": {
+  "hudud": "Andijon",
+  "joy": "Oltinkoʻl tumani, Suvyulduz"
+ },
+ "40.5542,72.3542": {
+  "hudud": "Andijon",
+  "joy": "Marhamat tumani, Qoraqoʻrgʻon"
+ },
+ "41.3875,60.3375": {
+  "hudud": "Xorazm",
+  "joy": "Xiva tumani, Шиклар"
+ },
+ "40.7125,72.1542": {
+  "hudud": "Andijon",
+  "joy": "Shahrixon tumani, Segaza Qum"
+ },
+ "41.1875,71.5125": {
+  "hudud": "Namangan Viloyati",
+  "joy": "Kosonsoy tumani, Goʻrmiron"
+ },
+ "40.4792,71.8042": {
+  "hudud": "Farg'ona Viloyati",
+  "joy": "Toshloq tumani, Teraktagi"
+ },
+ "41.6958,60.7542": {
+  "hudud": "Qoraqalpogʻiston Respublikasi",
+  "joy": "Beruniy tumani, Sarıtaw"
+ },
+ "40.9458,72.5125": {
+  "hudud": "Andijon",
+  "joy": "Paxtaobod tumani, Pushmon"
+ },
+ "39.4125,67.2542": {
+  "hudud": "Samarqand",
+  "joy": "Ugrut tumani"
+ },
+ "41.1125,69.0625": {
+  "hudud": "Toshkent viloyati",
+  "joy": "Yangiyo'l shahri"
+ },
+ "39.5875,67.0625": {
+  "hudud": "Samarqand",
+  "joy": "Toyloq tumani, Nurafshon"
+ },
+ "41.0542,71.8625": {
+  "hudud": "Namangan Viloyati",
+  "joy": "Chortoq tumani, Короскон"
+ },
+ "41.5208,60.5958": {
+  "hudud": "Xorazm",
+  "joy": "Urganch tumani, G'aybu"
+ },
+ "40.6292,72.3708": {
+  "hudud": "Andijon",
+  "joy": "Buloqboshi tumani, Kulla"
+ },
+ "40.9958,71.0792": {
+  "hudud": "Namangan Viloyati",
+  "joy": "Chust tumani, Olmos"
+ },
+ "41.2958,69.2625": {
+  "hudud": "Toshkent shahri",
+  "joy": "Yakkasaroy tumani"
+ },
+ "41.2458,69.3375": {
+  "hudud": "Toshkent shahri",
+  "joy": "Yashnobod tumani"
+ },
+ "41.3208,69.1708": {
+  "hudud": "Toshkent shahri",
+  "joy": "Uchtepa tumani"
+ },
+ "41.3708,69.2458": {
+  "hudud": "Toshkent shahri",
+  "joy": "Qoraqamish"
+ },
+ "41.1792,69.2208": {
+  "hudud": "Toshkent shahri",
+  "joy": "Binokor"
+ },
+ "41.3458,69.3375": {
+  "hudud": "Toshkent shahri",
+  "joy": "Feruza (Severo-Vostok)"
+ },
+ "41.1875,69.1208": {
+  "hudud": "Toshkent viloyati",
+  "joy": "Yangiyo'l tumani, Xonqoʻrgʻon"
+ },
+ "41.1208,69.1625": {
+  "hudud": "Toshkent viloyati",
+  "joy": "A. Ortiqov QFY, колхоз имени Ленина"
+ },
+ "41.1542,69.4042": {
+  "hudud": "Toshkent viloyati",
+  "joy": "Yuqorichirchiq tumani, Navro'z"
+ },
+ "41.0708,69.2625": {
+  "hudud": "Toshkent viloyati",
+  "joy": "O'rtachirchiq tumani, Uyg'ur"
+ },
+ "41.2625,69.1125": {
+  "hudud": "Toshkent viloyati",
+  "joy": "Zangiota tumani, Shaymonoprik"
+ },
+ "41.1208,69.0625": {
+  "hudud": "Toshkent viloyati",
+  "joy": "Yangiyo'l shahri"
+ },
+ "41.2125,69.4625": {
+  "hudud": "Toshkent shahri",
+  "joy": "Navoiy"
+ },
+ "41.0542,69.3708": {
+  "hudud": "Toshkent viloyati",
+  "joy": "O'rtachirchiq tumani, Unbeshovul"
+ }
+}
