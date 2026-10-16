@@ -1,0 +1,39 @@
+# Prod deploy: main'ga har push'da prod kompyuteridagi runner (label "yetkaz-prod")
+# deploy\deploy.ps1 ni ishga tushiradi: git pull (faqat fast-forward), kerak bo'lsa botni qayta ishga tushiradi.
+# O'rnatish va qoidalar: TEXNIK_HUJJAT.md, 3-bo'lim "Avtomatik deploy".
+name: Deploy prod
+
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:
+    inputs:
+      restart:
+        description: "O'zgarish bo'lmasa ham botni qayta ishga tushirish"
+        type: boolean
+        default: false
+
+concurrency:
+  group: prod-deploy
+  cancel-in-progress: false
+
+permissions:
+  contents: read
+
+jobs:
+  deploy:
+    runs-on: [self-hosted, yetkaz-prod]
+    timeout-minutes: 15
+    steps:
+      - name: deploy.ps1
+        shell: powershell
+        env:
+          GH_TOKEN: ${{ github.token }}
+          RESTART: ${{ inputs.restart }}
+        run: |
+          $dir = if ($env:YETKAZ_PROD_DIR) { $env:YETKAZ_PROD_DIR } else { "D:\Yetkaz dashboard" }
+          if (-not (Test-Path "$dir\deploy\deploy.ps1")) { throw "Prod papka topilmadi: '$dir' (runner .env -> YETKAZ_PROD_DIR)" }
+          $a = @("-NoProfile", "-ExecutionPolicy", "Bypass", "-File", "$dir\deploy\deploy.ps1")
+          if ($env:RESTART -eq "true") { $a += "-Restart" }
+          & powershell @a
+          exit $LASTEXITCODE

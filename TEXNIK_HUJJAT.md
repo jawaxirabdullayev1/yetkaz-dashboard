@@ -56,7 +56,20 @@ Stop-ScheduledTask  -TaskName "YETKAZ lid bot va dashboard"
 Start-ScheduledTask -TaskName "YETKAZ lid bot va dashboard"
 Get-Content "D:\Yetkaz dashboard\logs\bot.log" -Tail 50
 ```
-Kod/sozlama o'zgarsa — vazifani to'xtatib qayta ishga tushirish kerak (`Stop-ScheduledTask` dan keyin jarayon qolsa, `pythonw.exe` ni tugating).
+Kod/sozlama o'zgarsa — vazifani to'xtatib qayta ishga tushirish kerak (`Stop-ScheduledTask` dan keyin jarayon qolsa, `pythonw.exe` ni tugating). GitHub'dan kelgan kod uchun buni avtomatik deploy o'zi qiladi (pastda).
+
+### Avtomatik deploy (GitHub → shu kompyuter)
+
+`main` ga har push'dan keyin GitHub Actions (`.github/workflows/deploy.yml`) shu kompyuterdagi runner orqali `deploy\deploy.ps1` ni ishga tushiradi:
+- `git fetch` va faqat fast-forward. Papkada commit qilinmagan o'zgarish yoki GitHub'da yo'q commit bo'lsa — to'xtaydi, hech narsa o'zgarmaydi;
+- shaxsiy fayllar (`config_local.py`, `leads.db`, `rasmlar/`, `data/filiallar.json`, `python/`) `.gitignore` da — tegilmaydi;
+- faqat `dashboard/`, `offer.txt`, `*.md` o'zgarsa bot qayta ishga tushmaydi (bu fayllar har safar diskdan o'qiladi); boshqa o'zgarishda vazifa to'xtatilib qayta ishga tushiriladi va `/login` tekshiriladi;
+- `requirements.txt` o'zgarsa — `python\python.exe -m pip install -r requirements.txt` (ichki Python'da pip bo'lishi kerak);
+- yangi versiya ishga tushmasa — oldingi commit'ga qaytariladi, bot eskisi bilan ishlaydi, GitHub'da job qizil bo'ladi.
+
+Runner: `C:\actions-runner`, label `yetkaz-prod`, Windows'ga kirganda **"YETKAZ GitHub runner"** vazifasi ishga tushiradi (bir martalik sozlash: `deploy\install-runner.ps1`). Holati: GitHub → Settings → Actions → Runners (Idle — tayyor). Qo'lda deploy: GitHub → Actions → "Deploy prod" → Run workflow, yoki shu yerda `powershell -ExecutionPolicy Bypass -File deploy\deploy.ps1 -Restart`.
+
+Diqqat: `main` ga yozish huquqi bor har kim shu kompyuterda (bot foydalanuvchisi nomidan) kod ishga tushira oladi. Repo ochiq (public) ekan, Settings → Actions → General'da begona fork PR'lar uchun tasdiqlashni yoqing yoki repo'ni yopiq (private) qiling.
 
 ## 4. Yangi joyga o'rnatish
 
