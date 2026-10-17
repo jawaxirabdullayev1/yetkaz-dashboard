@@ -26,7 +26,9 @@ jobs:
     timeout-minutes: 15
     steps:
       - name: deploy.ps1
-        shell: powershell
+        # standart "shell: powershell" skriptni ". 'fayl.ps1'" bilan ishga tushiradi - Windows'da skriptlar
+        # taqiqlangan bo'lsa (ExecutionPolicy Restricted) yiqiladi; -ExecutionPolicy Bypass -File bilan ishlaydi
+        shell: powershell -NoProfile -ExecutionPolicy Bypass -File {0}
         env:
           GH_TOKEN: ${{ github.token }}
           RESTART: ${{ inputs.restart }}
