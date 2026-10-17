@@ -197,6 +197,32 @@ def create_app(tg_bot, api):
             logging.exception("Tarmoq tahlili xatosi")
             return web.json_response({"error": str(e)}, status=500)
 
+    async def bot_settings_get(_):
+        import settings_store as ss
+        return web.json_response({"settings": ss.current(), "defaults": ss.DEFAULTS,
+                                  "saved": ss.FILE.exists(), "history": ss.history(15)})
+
+    async def bot_settings_save(request):
+        import settings_store as ss
+        body = await request.json()
+        try:
+            clean, changed = ss.save(body.get("settings") or {})
+        except ValueError as e:
+            return web.json_response({"ok": False, "error": str(e)}, status=400)
+        return web.json_response({"ok": True, "settings": ss.current(), "changed": changed})
+
+    async def recheck_api(_):
+        n = 0
+        for l in api.all_leads():
+            if l["holat"] == api.DONE:
+                await api.run_evaluation(l); n += 1
+        return web.json_response({"ok": True, "n": n})
+
+    async def bot_settings_reset(_):
+        import settings_store as ss
+        clean, changed = ss.save(ss.DEFAULTS, who="dashboard (asl holiga qaytarildi)")
+        return web.json_response({"ok": True, "settings": ss.current(), "changed": changed})
+
     async def zones_api(request):
         import asyncio
         import analytics
@@ -319,6 +345,10 @@ def create_app(tg_bot, api):
     app.router.add_get("/api/leads", leads)
     app.router.add_get("/api/network", network)
     app.router.add_get("/api/zones", zones_api)
+    app.router.add_get("/api/bot_settings", bot_settings_get)
+    app.router.add_post("/api/bot_settings", bot_settings_save)
+    app.router.add_post("/api/bot_settings/reset", bot_settings_reset)
+    app.router.add_post("/api/recheck", recheck_api)
     app.router.add_post("/api/evaluate", evaluate_point)
     app.router.add_post("/api/branches", branch_create)
     app.router.add_put("/api/branches/{bid}", branch_update)

@@ -52,8 +52,8 @@ main > *{min-width:0}
 .kpi .d{position:absolute;top:16px;right:16px;width:9px;height:9px;border-radius:50%}
 .kpi.dark{background:var(--navy);color:var(--cream);border-color:var(--navy)} .kpi.dark .mono,.kpi.dark .s{color:#9aa6b8}
 /* tabs */
-.tabs{display:grid;grid-template-columns:repeat(5,minmax(0,1fr));gap:10px;padding:12px;border-bottom:1px solid var(--line)}
-@media (max-width:900px){.tabs{grid-template-columns:repeat(5,minmax(150px,1fr));overflow-x:auto;scrollbar-width:none}}
+.tabs{display:grid;grid-template-columns:repeat(6,minmax(0,1fr));gap:10px;padding:12px;border-bottom:1px solid var(--line)}
+@media (max-width:900px){.tabs{grid-template-columns:repeat(6,minmax(150px,1fr));overflow-x:auto;scrollbar-width:none}}
 .tab{display:grid;grid-template-columns:44px 1fr;grid-template-rows:auto auto;column-gap:12px;align-items:center;text-align:left;
   background:var(--soft);border:1px solid transparent;border-radius:12px;padding:12px 14px;color:var(--text);transition:background .15s,border-color .15s,transform .15s}
 .tab:hover{border-color:var(--teal2);transform:translateY(-1px)}
@@ -202,6 +202,41 @@ pre{white-space:pre-wrap;margin:0;font:inherit}
 .merr{color:var(--red);font-size:13px;font-weight:600}
 .toast{position:fixed;bottom:20px;left:50%;transform:translateX(-50%);background:var(--navy);color:var(--cream);padding:10px 16px;border-radius:9px;z-index:3000;display:none;box-shadow:0 6px 20px rgba(0,0,0,.25)}
 .hidden{display:none!important}
+/* ===== Bot sozlamalari ===== */
+.bsbar{display:flex;flex-wrap:wrap;gap:10px;align-items:center;margin-bottom:14px}
+.bsbar h5{margin:0;font-size:17px;font-weight:800}
+.bsstate{font-size:12.5px;color:var(--muted)} .bsstate.dirty{color:var(--orange);font-weight:700}
+.bsgrid{display:grid;grid-template-columns:minmax(0,1fr) 360px;gap:16px;align-items:start}
+@media (max-width:1100px){.bsgrid{grid-template-columns:1fr}}
+.bscard{border:1px solid var(--line);border-radius:12px;padding:14px;background:var(--card);margin-bottom:12px}
+.bscard.focus{border-color:var(--teal);box-shadow:0 0 0 2px rgba(74,127,153,.15)}
+.bscard h6{margin:0 0 4px;font-size:14px;font-weight:800;display:flex;align-items:center;gap:8px}
+.bscard .hint{font-size:12px;color:var(--muted);margin-bottom:8px}
+.bscard textarea.inp{min-height:90px;font-size:13.5px}
+.bsrow{display:flex;gap:8px;align-items:center;flex-wrap:wrap;margin-top:8px}
+.bsrow label{font-size:12.5px;color:var(--muted);font-weight:600;display:flex;align-items:center;gap:6px}
+.qn{display:inline-grid;place-items:center;min-width:26px;height:26px;border-radius:8px;background:var(--navy);color:var(--cream);font-size:12px;font-weight:800}
+.qtools{margin-left:auto;display:flex;gap:4px}
+.qtools button{border:1px solid var(--line);background:var(--card);border-radius:7px;width:30px;height:28px}
+.qtools button:hover{border-color:var(--teal2)} .qtools button.del:hover{border-color:var(--red);color:var(--red)}
+.bsopt{display:grid;grid-template-columns:1fr 90px 32px;gap:6px;margin-top:6px}
+.bsopt.nopts{grid-template-columns:1fr 32px}
+.fixed{border:1px dashed var(--line);border-radius:12px;padding:12px 14px;margin-bottom:12px;font-size:13px;background:var(--soft)}
+.fixed b{white-space:nowrap}
+.addq{width:100%;border:2px dashed var(--line);background:none;border-radius:12px;padding:12px;font-weight:700;color:var(--muted)}
+.addq:hover{border-color:var(--teal);color:var(--teal)}
+/* Telegram ko'rinishi */
+.tgprev{position:sticky;top:90px;border-radius:14px;overflow:hidden;border:1px solid var(--line)}
+.tghead{background:#517da2;color:#fff;padding:10px 14px;font-weight:700;font-size:14px;display:flex;gap:10px;align-items:center}
+.tghead i{width:30px;height:30px;border-radius:50%;background:#fff3;display:grid;place-items:center;font-style:normal}
+.tgbody{background:#cfdfe9 radial-gradient(#ffffff22 1px,transparent 1px) 0 0/14px 14px;padding:14px;min-height:300px;display:flex;flex-direction:column;gap:6px}
+.tgmsg{background:#fff;color:#111;border-radius:12px 12px 12px 4px;padding:8px 11px;max-width:92%;font-size:13.5px;line-height:1.42;white-space:pre-wrap;box-shadow:0 1px 1px #0002}
+.tgmsg.me{align-self:flex-end;background:#effdde;border-radius:12px 12px 4px 12px}
+.tgbtns{display:grid;gap:4px;max-width:92%}
+.tgbtns span{background:#ffffffcc;color:#2b5278;border-radius:8px;padding:7px;text-align:center;font-size:13px;font-weight:600}
+.tgnote{font-size:11.5px;color:#4a5b6a;text-align:center;margin-top:4px}
+.bshist div{border-left:2px solid var(--teal2);padding:4px 0 4px 10px;margin-bottom:8px;font-size:13px}
+.bshist small{color:var(--muted);display:block}
 /* Zonalar (olti burchakli kataklar) */
 .hexi{display:inline-block;width:14px;height:16px;clip-path:polygon(50% 0,100% 25%,100% 75%,50% 100%,0 75%,0 25%);vertical-align:-3px;margin-right:6px}
 .zleg{display:flex;flex-wrap:wrap;gap:8px 20px;font-size:13.5px;padding:2px 4px}
@@ -282,10 +317,12 @@ pre{white-space:pre-wrap;margin:0;font:inherit}
       <button class="tab" data-p="arizalar"><span class="ti"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 3H6a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V9z"/><path d="M14 3v6h6M8 13h8M8 17h5"/></svg></span><span class="tt"><small>03</small>Arizalar</span><em id="tc-arizalar">Telegram botdan</em></button>
       <button class="tab" data-p="gaps"><span class="ti"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="8" stroke-dasharray="3 3"/><path d="M12 8v8M8 12h8"/></svg></span><span class="tt"><small>04</small>Bo'sh hududlar</span><em id="tc-gaps">yangi filial uchun joylar</em></button>
       <button class="tab" data-p="tahlil"><span class="ti"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 20V10M10 20V4M16 20v-7M22 20H2"/></svg></span><span class="tt"><small>05</small>Tahlil</span><em id="tc-tahlil">tarmoq va arizalar</em></button>
+      <button class="tab" data-p="bot"><span class="ti"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 1 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 1 1-4 0v-.09a1.65 1.65 0 0 0-1-1.51 1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 1 1-2.83-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 1 1 0-4h.09a1.65 1.65 0 0 0 1.51-1 1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 1 1 2.83-2.83l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 1 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 1 1 2.83 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 1 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg></span><span class="tt"><small>06</small>Bot sozlamalari</span><em id="tc-bot">savollar va matnlar</em></button>
     </div>
     <div class="pane on" id="p-filiallar"><div class="vgrid" id="bgrid"></div></div>
     <div class="pane" id="p-arizalar"><div class="vgrid" id="vgrid"></div></div>
     <div class="pane" id="p-gaps"></div>
+    <div class="pane" id="p-bot"><div class="empty">Yuklanmoqda...</div></div>
     <div class="pane" id="p-tahlil">
       <div class="seg"><button class="on" data-s="tarmoq">Tarmoq</button><button data-s="arizalar">Arizalar</button></div>
       <div id="tahlilBody"></div>
@@ -456,6 +493,7 @@ function renderTabCounts(){
   set("arizalar", nNew ? `🆕 ${nNew} yangi · jami ${L.length}` : `${L.length} ta · bugun ${L.filter(l=>l.created.slice(0,10)===t).length}`);
   set("gaps", `${S.N?.gaps.length ?? 0} ta istiqbolli joy`);
   set("tahlil", "tarmoq va arizalar");
+  set("bot", `${(S.L.questions||[]).length} + ${(S.L.followup||[]).length} savol · matnlar`);
 }
 function renderAll(){
   renderKpis(); renderTabCounts();
@@ -1249,6 +1287,169 @@ function flyTo(lat, lon, z, html){ setTab("xarita"); setTimeout(() => { map.setV
 function openLeadFromAnywhere(id){ S.sel = id; S.kpi = ""; S.status = ""; setTab("arizalar"); renderAll(); document.querySelector(`#rows .lr[data-id="${id}"]`)?.scrollIntoView({block:"center"}); }
 function openBranchCard(id){ S.bsel = id; S.kpi = ""; S.bchip = ""; setTab("filiallar"); renderBRows(); renderBDetail(); document.querySelector(`#brows .lr[data-id="${id}"]`)?.scrollIntoView({block:"center"}); }
 
+
+/* ---------- BOT SOZLAMALARI ---------- */
+const BS = {orig:null, cur:null, defaults:null, hist:[], sub:"matn", focus:null, saved:false};
+const BS_TXT = [
+  ["GREETING","👋 Salomlashuv","Odam /start bosganda birinchi chiqadigan xabar. Undan keyin bot «Ism va familiyangizni kiriting» deb so'raydi.",true],
+  ["FINISH_TEXT","✅ Anketa tugaganda","1-bosqich savollari tugagach odamga chiqadigan xabar.",true],
+  ["OFFER","📨 Tijoriy taklif (2-bosqich)","Admin «Taklif yuborish» bosganda odamga boradigan matn. Ostida «Roziman / Savolim bor / Rad etaman» tugmalari chiqadi.",false],
+  ["FOLLOWUP_FINISH_TEXT","📋 Hujjatlar qabul qilinganda","3-bosqich savollari tugagach chiqadigan xabar.",true],
+  ["APPROVED_TEXT","🎉 Hujjatlar tasdiqlanganda","Admin «Hujjatlarni tasdiqlash» bosganda odamga boradigan xabar.",false],
+];
+const BS_NUM = [
+  ["HOT_SCORE","🔥 «Issiq» chegarasi (ball)","Ball shundan katta yoki teng bo'lsa — Issiq",1],
+  ["WARM_SCORE","🌤 «Iliq» chegarasi (ball)","Ball shundan katta yoki teng bo'lsa — Iliq, aks holda Sovuq",1],
+  ["SHAHAR_RADIUS_KM","🏙 Shaharda filiallar orasidagi eng kam masofa (km)","Shu masofada aktiv filial bo'lsa — ariza «❌ Ma'qul emas»",0.1],
+  ["TUMAN_RADIUS_KM","🏘 Tumanda filiallar orasidagi eng kam masofa (km)","Shu masofada aktiv filial bo'lsa — ariza «❌ Ma'qul emas»",0.1],
+  ["GAVJUM_ZICHLIK","👥 «Aholi gavjum» chegarasi (kishi/km²)","Shundan zich bo'lsa va yaqinda filial bo'lmasa — «✅ Ma'qul»",50],
+  ["ORTA_ZICHLIK","🌾 «Aholi kam» chegarasi (kishi/km²)","Shundan siyrak joy — «❌ Ma'qul emas»; o'rtasi — «⚠️ Ko'rib chiqish»",50],
+];
+const bsDirty = () => BS.cur && JSON.stringify(BS.cur) !== BS.orig;
+window.addEventListener("beforeunload", e => { if (bsDirty()) { e.preventDefault(); e.returnValue = ""; } });
+
+async function loadBotSettings(force){
+  if (BS.cur && !force) return renderBotSettings();
+  const j = await (await fetch("/api/bot_settings")).json();
+  BS.cur = j.settings; BS.orig = JSON.stringify(j.settings); BS.defaults = j.defaults; BS.hist = j.history; BS.saved = j.saved;
+  renderBotSettings();
+}
+function maxScore(){ return (BS.cur.QUESTIONS||[]).reduce((s,q) => s + (q.type==="choice" ? Math.max(0, ...q.options.map(o=>+o[1]||0)) : (+q.points||0)), 0); }
+function tgHtml(t){ // Telegram HTML ko'rinishi: faqat ruxsat etilgan teglar
+  return esc(t).replace(/&lt;(\/?)(b|strong|i|em|u|s|code)&gt;/gi, "<$1$2>");
+}
+function renderBotSettings(){
+  const c = BS.cur, d = bsDirty();
+  const subs = [["matn","✍️ Matnlar"],["q1","① Anketa savollari"],["q3","③ Hujjat savollari"],["baho","⚖️ Baholash qoidalari"],["tarix","🕘 Tarix"]];
+  let body = "";
+  if (BS.sub === "matn") body = BS_TXT.map(([k,t,h,html]) => `<div class="bscard ${BS.focus===k?"focus":""}" data-f="${k}"><h6>${t}</h6><div class="hint">${h}${html?" <b>qalin</b> uchun &lt;b&gt;…&lt;/b&gt;, qiya uchun &lt;i&gt;…&lt;/i&gt; ishlating.":""}</div>
+      <textarea class="inp" data-k="${k}" rows="${k==="OFFER"?14:4}">${esc(c[k])}</textarea></div>`).join("");
+  if (BS.sub === "q1") body = `<div class="fixed">Bu savollardan <b>oldin</b> bot o'zi so'raydi (o'zgarmaydi): <b>Ism-familiya</b> → <b>Lokatsiya</b> → <b>Viloyat</b> → <b>Tuman</b> → <b>Telefon</b>.
+      Ballar bo'yicha ariza 🔥 Issiq / 🌤 Iliq / ❄️ Sovuq bo'ladi. Hozirgi eng yuqori ball: <b>${maxScore()}</b> (Issiq ≥ ${c.HOT_SCORE}, Iliq ≥ ${c.WARM_SCORE}).</div>`
+      + c.QUESTIONS.map((q,i) => qCard(q,i,1)).join("") + `<button class="addq" data-add="1">＋ Savol qo'shish</button>`;
+  if (BS.sub === "q3") body = `<div class="fixed">Bu savollar odam taklifga <b>«Roziman»</b> degandan keyin beriladi (pasport, rasmlar, bank va h.k.).
+      Rasm savollarida rasm yuborilmaguncha keyingi savolga o'tilmaydi.</div>`
+      + c.FOLLOWUP_QUESTIONS.map((q,i) => qCard(q,i,3)).join("") + `<button class="addq" data-add="3">＋ Savol qo'shish</button>`;
+  if (BS.sub === "baho") body = `<div class="fixed">Bu qoidalar <b>yangi</b> arizalarga darhol qo'llanadi. Eski arizalarni ham qayta baholash uchun saqlagandan keyin pastdagi tugmani bosing.</div>`
+      + BS_NUM.map(([k,t,h,st]) => `<div class="bscard"><h6>${t}</h6><div class="hint">${h}</div><input type="number" class="inp" data-k="${k}" step="${st}" value="${c[k]}" style="max-width:180px"></div>`).join("")
+      + `<button class="abtn" id="bsRecheck">↻ Barcha arizalarni qayta baholash</button>`;
+  if (BS.sub === "tarix") body = `<div class="bscard bshist"><h6>So'nggi saqlashlar</h6>${BS.hist.length ? BS.hist.map(h => `<div><b>${esc(h.vaqt)}</b> · ${esc(h.kim)}<small>O'zgargan: ${esc((h.ozgargan||[]).map(bsName).join(", ") || "—")}</small></div>`).join("") : '<div class="hint">Hali dashboarddan saqlanmagan — config.py dagi asl sozlamalar ishlayapti.</div>'}</div>`;
+  $("#p-bot").innerHTML = `
+    <div class="bsbar"><div><div class="mono">Telegram bot</div><h5>Bot sozlamalari</h5></div>
+      <span class="bsstate ${d?"dirty":""}" id="bsState">${d ? "● O'zgarishlar saqlanmagan" : (BS.saved ? "✓ Saqlangan — botda amalda" : "Asl sozlamalar (config.py)")}</span>
+      <div style="flex:1"></div>
+      <button class="abtn" id="bsReset" title="config.py dagi asl savollar va matnlarga qaytarish">↺ Asl holiga qaytarish</button>
+      <button class="abtn" id="bsCancel" ${d?"":"disabled"}>Bekor qilish</button>
+      <button class="abtn pri" id="bsSave" ${d?"":"disabled"}>💾 Saqlash</button></div>
+    <div class="seg" style="flex-wrap:wrap">${subs.map(([k,t]) => `<button class="${BS.sub===k?"on":""}" data-sub="${k}">${t}</button>`).join("")}</div>
+    <div class="bsgrid"><div>${body}</div><div>${tgPreview()}</div></div>`;
+  bindBotSettings();
+}
+function bsName(k){ return ({GREETING:"salomlashuv",FINISH_TEXT:"anketa tugaganda",OFFER:"taklif",FOLLOWUP_FINISH_TEXT:"hujjatlar qabul qilinganda",APPROVED_TEXT:"tasdiqlanganda",
+  QUESTIONS:"anketa savollari",FOLLOWUP_QUESTIONS:"hujjat savollari",HOT_SCORE:"Issiq chegarasi",WARM_SCORE:"Iliq chegarasi",SHAHAR_RADIUS_KM:"shahar masofasi",
+  TUMAN_RADIUS_KM:"tuman masofasi",GAVJUM_ZICHLIK:"gavjum zichlik",ORTA_ZICHLIK:"aholi kam chegarasi"})[k] || k; }
+function qCard(q, i, st){
+  const list = st===1 ? BS.cur.QUESTIONS : BS.cur.FOLLOWUP_QUESTIONS, fid = `q${st}_${i}`;
+  const types = st===1 ? [["text","✍️ Yozma javob"],["choice","🔘 Tugmali tanlov"]] : [["photo","📷 Rasm"],["text","✍️ Yozma javob"],["choice","🔘 Tugmali tanlov"]];
+  let extra = "";
+  if (q.type === "choice") {
+    const opts = q.options || [];
+    extra = `<div class="hint" style="margin:10px 0 0">Javob variantlari${st===1?" va ballari":""}:</div>` + opts.map((o,oi) => st===1
+      ? `<div class="bsopt"><input class="inp" data-o="${oi}" data-of="t" value="${esc(o[0])}" maxlength="60" placeholder="Variant matni"><input class="inp" type="number" data-o="${oi}" data-of="p" value="${o[1]}" title="Ball"><button class="abtn" data-odel="${oi}" title="O'chirish">✕</button></div>`
+      : `<div class="bsopt nopts"><input class="inp" data-o="${oi}" data-of="t" value="${esc(o)}" maxlength="60" placeholder="Variant matni"><button class="abtn" data-odel="${oi}" title="O'chirish">✕</button></div>`).join("")
+      + `<div class="bsrow"><button class="abtn" data-oadd="1">＋ Variant</button></div>`;
+  } else if (q.type === "text") {
+    extra = `<div class="bsrow">` + (st===1
+      ? `<label>Ball (javob «yo'q» bo'lmasa): <input class="inp" type="number" data-qf="points" value="${q.points||0}" style="width:90px"></label>`
+      : `<label>Tekshiruv: <select class="inp" data-qf="require"><option value="">Yo'q</option><option value="phone" ${q.require==="phone"?"selected":""}>Telefon raqam bo'lishi shart</option><option value="card" ${q.require==="card"?"selected":""}>16 xonali karta raqami bo'lishi shart</option></select></label>`) + `</div>`;
+  }
+  return `<div class="bscard ${BS.focus===fid?"focus":""}" data-q="${st}" data-i="${i}" data-f="${fid}">
+    <h6><span class="qn">${i+1}</span><select class="inp" data-qf="type">${types.map(([v,t]) => `<option value="${v}" ${q.type===v?"selected":""}>${t}</option>`).join("")}</select>
+      ${st===3?`<input class="inp" data-qf="name" value="${esc(q.name||"")}" placeholder="Qisqa nom (Excel/ZIP uchun)" maxlength="40" style="max-width:220px">`:""}
+      <span class="qtools"><button data-mv="-1" title="Yuqoriga" ${i===0?"disabled":""}>↑</button><button data-mv="1" title="Pastga" ${i===list.length-1?"disabled":""}>↓</button><button class="del" data-qdel="1" title="Savolni o'chirish">🗑</button></span></h6>
+    <textarea class="inp" data-qf="text" rows="2" placeholder="Savol matni">${esc(q.text)}</textarea>${extra}</div>`;
+}
+function tgPreview(){
+  const c = BS.cur, f = BS.focus || "GREETING", msgs = [];
+  const m = (t, me) => msgs.push(`<div class="tgmsg ${me?"me":""}">${t}</div>`);
+  const btns = arr => msgs.push(`<div class="tgbtns">${arr.map(b => `<span>${esc(b)}</span>`).join("")}</div>`);
+  if (f === "GREETING") { m(tgHtml(c.GREETING) + "\n\nIsm va familiyangizni kiriting:"); m("Aliyev Vali", true); }
+  else if (f === "OFFER") { m(esc(c.OFFER)); btns(["✅ Roziman"]); msgs.push(`<div class="tgbtns" style="grid-template-columns:1fr 1fr"><span>❓ Savolim bor</span><span>❌ Rad etaman</span></div>`); }
+  else if (BS_TXT.some(x => x[0] === f)) m(BS_TXT.find(x=>x[0]===f)[3] ? tgHtml(c[f]) : esc(c[f]));
+  else if (/^q[13]_\d+$/.test(f)) {
+    const st = +f[1], i = +f.split("_")[1], list = st===1 ? c.QUESTIONS : c.FOLLOWUP_QUESTIONS, q = list[i];
+    if (q) { m(`<b>${i+1}/${list.length}.</b> ` + tgHtml(q.text));
+      if (q.type === "choice") btns((q.options||[]).map(o => Array.isArray(o) ? o[0] : o));
+      else if (q.type === "photo") msgs.push(`<div class="tgnote">📷 Odam rasm yuborishi kerak</div>`);
+      else msgs.push(`<div class="tgnote">✍️ Odam javobni yozib yuboradi${q.require==="phone"?" (telefon tekshiriladi)":q.require==="card"?" (karta raqami tekshiriladi)":""}</div>`); }
+  }
+  return `<div class="tgprev"><div class="tghead"><i>Y</i>YangiFilial <span style="opacity:.7;font-weight:400;font-size:12px">bot</span></div>
+    <div class="tgbody">${msgs.join("")}</div></div><div class="tgnote" style="color:var(--muted)">Telegram'dagi taxminiy ko'rinish — maydonni bosing</div>`;
+}
+function bsUpdate(){ const st = $("#bsState"), d = bsDirty();
+  st.textContent = d ? "● O'zgarishlar saqlanmagan" : (BS.saved ? "✓ Saqlangan — botda amalda" : "Asl sozlamalar (config.py)");
+  st.classList.toggle("dirty", d); $("#bsSave").disabled = !d; $("#bsCancel").disabled = !d;
+  const pv = document.querySelector(".bsgrid > div:last-child"); if (pv) pv.innerHTML = tgPreview(); }
+function bindBotSettings(){
+  const c = BS.cur;
+  document.querySelectorAll("#p-bot [data-sub]").forEach(b => b.onclick = () => { BS.sub = b.dataset.sub; BS.focus = null; renderBotSettings(); });
+  document.querySelectorAll("#p-bot [data-f]").forEach(el => el.addEventListener("focusin", () => {
+    if (BS.focus === el.dataset.f) return; document.querySelectorAll("#p-bot .bscard.focus").forEach(x=>x.classList.remove("focus"));
+    BS.focus = el.dataset.f; el.classList.add("focus"); bsUpdate(); }));
+  document.querySelectorAll("#p-bot textarea[data-k], #p-bot input[data-k]").forEach(el => el.addEventListener("input", () => {
+    c[el.dataset.k] = el.type === "number" ? +el.value : el.value; bsUpdate(); }));
+  document.querySelectorAll("#p-bot .bscard[data-q]").forEach(card => {
+    const st = +card.dataset.q, i = +card.dataset.i, list = st===1 ? c.QUESTIONS : c.FOLLOWUP_QUESTIONS, q = list[i];
+    card.querySelectorAll("[data-qf]").forEach(el => el.addEventListener(el.tagName==="SELECT" ? "change" : "input", () => {
+      const f = el.dataset.qf;
+      if (f === "type") {
+        q.type = el.value;
+        if (q.type === "choice" && !(q.options||[]).length) q.options = st===1 ? [["Ha",1],["Yo'q",0]] : ["Ha","Yo'q"];
+        if (q.type !== "choice") delete q.options;
+        if (q.type !== "text") delete q.require;
+        if (st===1 && q.type === "text" && q.points === undefined) q.points = 0;
+        if (st===1 && q.type === "choice") delete q.points;
+        BS.focus = `q${st}_${i}`; renderBotSettings(); return;
+      }
+      if (f === "points") q.points = +el.value; else if (f === "require") { if (el.value) q.require = el.value; else delete q.require; } else q[f] = el.value;
+      bsUpdate(); }));
+    card.querySelectorAll("[data-of]").forEach(el => el.addEventListener("input", () => {
+      const oi = +el.dataset.o;
+      if (st===1) { if (el.dataset.of === "t") q.options[oi][0] = el.value; else q.options[oi][1] = +el.value; } else q.options[oi] = el.value;
+      bsUpdate(); }));
+    card.querySelectorAll("[data-odel]").forEach(b => b.onclick = () => { if (q.options.length <= 2) return toast("Kamida 2 ta variant bo'lishi kerak"); q.options.splice(+b.dataset.odel,1); renderBotSettings(); });
+    card.querySelectorAll("[data-oadd]").forEach(b => b.onclick = () => { if (q.options.length >= 12) return toast("Ko'pi bilan 12 ta variant"); q.options.push(st===1 ? ["Yangi variant",0] : "Yangi variant"); BS.focus = `q${st}_${i}`; renderBotSettings(); });
+    card.querySelectorAll("[data-mv]").forEach(b => b.onclick = () => { const j = i + +b.dataset.mv; [list[i], list[j]] = [list[j], list[i]]; BS.focus = `q${st}_${j}`; renderBotSettings(); });
+    card.querySelectorAll("[data-qdel]").forEach(b => b.onclick = () => {
+      if (!confirm(`${i+1}-savol o'chirilsinmi?\n«${q.text.slice(0,80)}»\n\nEski arizalardagi shu savolga javoblar bazada qoladi, lekin ko'rsatilmaydi.`)) return;
+      list.splice(i,1); BS.focus = null; renderBotSettings(); });
+  });
+  document.querySelectorAll("#p-bot [data-add]").forEach(b => b.onclick = () => {
+    const st = +b.dataset.add, list = st===1 ? c.QUESTIONS : c.FOLLOWUP_QUESTIONS;
+    list.push(st===1 ? {type:"text", text:"Yangi savol?", points:0} : {type:"text", text:"Yangi savol?"});
+    BS.focus = `q${st}_${list.length-1}`; renderBotSettings();
+    document.querySelector(`#p-bot [data-f="q${st}_${list.length-1}"] textarea`)?.focus(); });
+  $("#bsCancel").onclick = () => { BS.cur = JSON.parse(BS.orig); renderBotSettings(); toast("O'zgarishlar bekor qilindi"); };
+  $("#bsSave").onclick = async () => {
+    const b = $("#bsSave"); b.disabled = true; b.textContent = "Saqlanmoqda...";
+    const r = await fetch("/api/bot_settings", {method:"POST", headers:{"Content-Type":"application/json"}, body: JSON.stringify({settings: BS.cur})});
+    const j = await r.json();
+    if (!j.ok) { b.disabled = false; b.textContent = "💾 Saqlash"; return toast("❌ " + j.error); }
+    toast("✅ Saqlandi — bot yangi sozlamalar bilan ishlayapti"); await loadBotSettings(true); await load();
+  };
+  $("#bsReset").onclick = async () => {
+    if (!confirm("Barcha savollar, matnlar va qoidalar config.py dagi asl holiga qaytarilsinmi?\n(Hozirgi holatning nusxasi zaxiraga saqlanadi.)")) return;
+    const j = await (await fetch("/api/bot_settings/reset", {method:"POST"})).json();
+    if (j.ok) { toast("↺ Asl holiga qaytarildi"); await loadBotSettings(true); await load(); }
+  };
+  const rc = $("#bsRecheck"); if (rc) rc.onclick = async () => {
+    if (bsDirty()) return toast("Avval o'zgarishlarni saqlang");
+    rc.disabled = true; rc.textContent = "Baholanmoqda...";
+    const j = await (await fetch("/api/recheck", {method:"POST"})).json();
+    rc.disabled = false; rc.textContent = "↻ Barcha arizalarni qayta baholash"; toast(`✅ ${j.n} ta ariza qayta baholandi`); await load();
+  };
+}
+
 /* ---------- tabs ---------- */
 function setTab(t){
   S.tab = t;
@@ -1258,7 +1459,7 @@ function setTab(t){
   $("#work").classList.toggle("hidden", t !== "arizalar");
   if (S.N && t==="filiallar") { renderBChips(); renderBRows(); renderBDetail(); }
   if (t==="arizalar") { renderViews(); renderChips(); renderRows(); renderDetail(); }
-  if (t==="tahlil") renderTahlil(); if (t==="gaps") renderGaps();
+  if (t==="tahlil") renderTahlil(); if (t==="gaps") renderGaps(); if (t==="bot") loadBotSettings();
   if (t==="xarita") { if (!map || mapDirty) renderMap(); else setTimeout(() => map.invalidateSize(), 100); }
 }
 document.querySelectorAll(".tab").forEach(b => b.onclick = () => setTab(b.dataset.p));
