@@ -62,7 +62,8 @@ Kod/sozlama o'zgarsa — vazifani to'xtatib qayta ishga tushirish kerak (`Stop-S
 ### Avtomatik deploy (GitHub → shu kompyuter)
 
 `main` ga har push'dan keyin GitHub Actions (`.github/workflows/deploy.yml`) shu kompyuterdagi runner orqali `deploy\deploy.ps1` ni ishga tushiradi:
-- `git fetch` va faqat fast-forward. Papkada commit qilinmagan o'zgarish yoki GitHub'da yo'q commit bo'lsa — to'xtaydi, hech narsa o'zgarmaydi;
+- `git fetch` va faqat fast-forward. Papkada commit qilinmagan o'zgarish yoki GitHub'da yo'q commit bo'lsa — to'xtaydi, hech narsa o'zgarmaydi. Istisno — `offer.txt` (dashboarddan tahrirlanadi): o'zgargan bo'lsa ham deploy davom etadi va unga tegmaydi;
+- bot vazifasi papka bo'yicha topiladi (`<papka>\python\` ni ishga tushiradigan vazifa, masalan noutbukdagi «YETKAZ dashboard (botsiz)» — `bot.py --faqat-dashboard`) va o'z argumentlari bilan qayta ishga tushadi; vazifa bo'lmasa deploy botni o'zi ishga tushirmaydi;
 - shaxsiy fayllar (`config_local.py`, `leads.db`, `rasmlar/`, `data/filiallar.json`, `python/`) `.gitignore` da — tegilmaydi;
 - faqat `dashboard/`, `offer.txt`, `*.md` o'zgarsa bot qayta ishga tushmaydi (bu fayllar har safar diskdan o'qiladi); boshqa o'zgarishda vazifa to'xtatilib qayta ishga tushiriladi va `/login` tekshiriladi;
 - `requirements.txt` o'zgarsa — `python\python.exe -m pip install -r requirements.txt` (ichki Python'da pip bo'lishi kerak);

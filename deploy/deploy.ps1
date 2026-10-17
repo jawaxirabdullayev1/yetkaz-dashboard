@@ -94,7 +94,9 @@ Write-Host "Papka: $Root"
 if (-not (Test-Path (Join-Path $Root ".git"))) { throw "$Root - git papka emas" }
 $branch = @(Invoke-Git rev-parse --abbrev-ref HEAD)[-1]
 if ($branch -ne "main") { throw "Papka '$branch' branch'ida turibdi, main kerak" }
-$dirty = @(Invoke-Git status --porcelain --untracked-files=no)
+# offer.txt dashboarddan ("Bot sozlamalari") tahrirlanadi - u o'zgargan bo'lsa ham deploy davom etadi va unga tegmaydi
+# (GitHub'dan kelgan commit offer.txt ni ham o'zgartirsa - git merge o'zi to'xtatadi)
+$dirty = @(Invoke-Git status --porcelain --untracked-files=no | Where-Object { $_.Substring(3) -notmatch '^offer\.txt$' })
 if ($dirty.Count) { throw ("Papkada commit qilinmagan o'zgarishlar bor - deploy to'xtadi, hech narsa o'zgarmadi:`n" + ($dirty -join "`n")) }
 
 Invoke-Git fetch origin main | Out-Null
@@ -131,7 +133,7 @@ try {
     if ($old -ne $new) {
         Write-Host "XATO: $err"
         Write-Host ("Oldingi versiyaga qaytarilmoqda: {0}" -f $old.Substring(0, 7))
-        Invoke-Git reset --hard $old | Out-Null
+        Invoke-Git reset --keep $old | Out-Null   # --keep: dashboarddan tahrirlangan offer.txt saqlanadi
         try { Stop-Bot; Start-Bot; Write-Host "Bot oldingi versiya bilan ishlayapti" }
         catch { Write-Host "Oldingi versiya ham ishga tushmadi: $_" }
     }
