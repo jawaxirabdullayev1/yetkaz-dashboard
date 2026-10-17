@@ -13,7 +13,6 @@ param([switch]$Restart)   # -Restart: o'zgarish bo'lmasa ham botni qayta ishga t
 $ErrorActionPreference = "Stop"
 $Root = Split-Path -Parent $PSScriptRoot
 $Port = if ($env:YETKAZ_PORT) { [int]$env:YETKAZ_PORT } else { 8800 }
-$TaskName = if ($env:YETKAZ_TASK) { $env:YETKAZ_TASK } else { "YETKAZ lid bot va dashboard" }
 $NoRestart = '^(dashboard/|deploy/|\.github/)|^offer\.txt$|\.md$'
 
 $Auth = @()
@@ -24,7 +23,7 @@ if ($env:GH_TOKEN) {   # workflow beradi: repo yopiq (private) bo'lsa ham fetch 
 
 function Invoke-Git {
     $ErrorActionPreference = "Continue"   # git progressni stderr'ga yozadi - PowerShell 5.1 buni xato deb olmasin
-    $out = & git -C $Root @Auth @args 2>&1 | ForEach-Object { "$_" }
+    $out = & git -C $Root -c "safe.directory=$($Root -replace '\\', '/')" @Auth @args 2>&1 | ForEach-Object { "$_" }
     if ($LASTEXITCODE -ne 0) { throw ("git " + ($args -join " ") + ":`n" + ($out -join "`n")) }
     $out
 }
@@ -46,10 +45,22 @@ function Test-Login {
     try { (Invoke-WebRequest "http://127.0.0.1:$Port/login" -UseBasicParsing -TimeoutSec 15).StatusCode -eq 200 } catch { $false }
 }
 
-function Get-BotTask { Get-ScheduledTask -TaskName $TaskName -ErrorAction SilentlyContinue }
+# Botni ishga tushiradigan vazifa: nomi har kompyuterda boshqacha ("YETKAZ lid bot va dashboard",
+# "YETKAZ dashboard (botsiz)" ...), argumentlari ham (--faqat-dashboard) - shuning uchun papka bo'yicha topamiz
+# va aynan o'shani qayta ishga tushiramiz. YETKAZ_TASK bilan nomini aniq berish mumkin.
+function Get-BotTask {
+    if ($env:YETKAZ_TASK) { return Get-ScheduledTask -TaskName $env:YETKAZ_TASK -ErrorAction SilentlyContinue }
+    $py = "$Root\python\"
+    @(Get-ScheduledTask -ErrorAction SilentlyContinue | Where-Object {
+        @($_.Actions | Where-Object {
+            "$($_.Execute)".Trim('"').StartsWith($py, [StringComparison]::OrdinalIgnoreCase) -or
+            ("$($_.WorkingDirectory)".Trim('"').TrimEnd('\') -ieq $Root -and "$($_.Execute)" -match 'python') }).Count -gt 0
+    }) | Select-Object -First 1
+}
 
 function Stop-Bot {
-    if (Get-BotTask) { Stop-ScheduledTask -TaskName $TaskName }
+    $task = Get-BotTask
+    if ($task) { $task | Stop-ScheduledTask }
     $pyDir = "$Root\python\"
     $ids = @(Get-CimInstance Win32_Process -Filter "Name = 'python.exe' OR Name = 'pythonw.exe'" |
         Where-Object { $_.CommandLine -match 'bot\.py' -and
@@ -67,13 +78,11 @@ function Stop-Bot {
 }
 
 function Start-Bot {
-    if (Get-BotTask) {
-        Start-ScheduledTask -TaskName $TaskName
-    } else {
-        Write-Host "Diqqat: '$TaskName' vazifasi topilmadi - bot oddiy jarayon sifatida ishga tushirilmoqda"
-        $env:RUNNER_TRACKING_ID = ""   # runner job tugaganda botni o'chirib yubormasin
-        Start-Process -FilePath (Join-Path $Root "python\pythonw.exe") -ArgumentList "bot.py" -WorkingDirectory $Root
-    }
+    $task = Get-BotTask
+    # vazifasiz o'zimiz ishga tushirmaymiz: qaysi argument bilan (bot yoki faqat dashboard) - noma'lum
+    if (-not $task) { throw "Task Scheduler'da $Root\python\ ni ishga tushiradigan vazifa topilmadi" }
+    Write-Host "Vazifa ishga tushirilmoqda: '$($task.TaskName)'"
+    $task | Start-ScheduledTask
     if (-not (Wait-Port $true 90)) {
         $log = Join-Path $Root "logs\bot.log"
         $tail = if (Test-Path $log) { (Get-Content $log -Tail 20 -Encoding UTF8) -join "`n" } else { "(logs\bot.log yo'q)" }
