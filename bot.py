@@ -379,6 +379,8 @@ async def ask_question(msg, state, qi):
 async def got_text_answer(msg: Message, state: FSMContext):
     data = await state.get_data()
     qi = data["qi"]
+    if qi >= len(config.QUESTIONS):          # savollar dashboarddan o'zgartirilgan
+        return await ask_question(msg, state, qi)
     q = config.QUESTIONS[qi]
     if q.get("type") == "choice":
         return await msg.answer("Iltimos, yuqoridagi tugmalardan birini tanlang 👆")
@@ -399,6 +401,10 @@ async def got_choice(cb: CallbackQuery, state: FSMContext):
     data = await state.get_data()
     if qi != data.get("qi"):
         return await cb.answer()
+    if qi >= len(config.QUESTIONS) or config.QUESTIONS[qi].get("type") != "choice" \
+            or oi >= len(config.QUESTIONS[qi]["options"]):   # savol o'zgartirilgan — qayta so'raymiz
+        await cb.answer("Savol yangilandi, qaytadan tanlang")
+        return await ask_question(cb.message, state, qi)
     q = config.QUESTIONS[qi]
     text, pts = q["options"][oi]
     answers = data["answers"]
@@ -685,6 +691,8 @@ async def ensure_photos(bot: Bot, leads):
 @dp.message(Stage2.question, F.photo)
 async def followup_photo(msg: Message, state: FSMContext):
     qi = (await state.get_data())["fqi"]
+    if qi >= len(config.FOLLOWUP_QUESTIONS):   # savollar dashboarddan o'zgartirilgan
+        return await ask_followup(msg, state, qi)
     if config.FOLLOWUP_QUESTIONS[qi]["type"] != "photo":
         return await msg.answer("Iltimos, savolga javob bering 👆")
     await save_followup(msg, state, qi, photo=msg.photo[-1].file_id)
@@ -694,6 +702,8 @@ async def followup_photo(msg: Message, state: FSMContext):
 async def followup_photo_file(msg: Message, state: FSMContext):
     """Rasm fayl ko'rinishida yuborilsa ham qabul qilinadi."""
     qi = (await state.get_data())["fqi"]
+    if qi >= len(config.FOLLOWUP_QUESTIONS):   # savollar dashboarddan o'zgartirilgan
+        return await ask_followup(msg, state, qi)
     if config.FOLLOWUP_QUESTIONS[qi]["type"] != "photo":
         return await msg.answer("Iltimos, savolga javob bering 👆")
     await save_followup(msg, state, qi, photo="doc:" + msg.document.file_id)
@@ -702,6 +712,8 @@ async def followup_photo_file(msg: Message, state: FSMContext):
 @dp.message(Stage2.question, F.text)
 async def followup_text(msg: Message, state: FSMContext):
     qi = (await state.get_data())["fqi"]
+    if qi >= len(config.FOLLOWUP_QUESTIONS):   # savollar dashboarddan o'zgartirilgan
+        return await ask_followup(msg, state, qi)
     q = config.FOLLOWUP_QUESTIONS[qi]
     if q["type"] == "photo":
         return await msg.answer("Bu savolga faqat rasm qabul qilinadi 📷\n"
@@ -728,6 +740,8 @@ async def followup_text(msg: Message, state: FSMContext):
 async def followup_other(msg: Message, state: FSMContext):
     """Stiker, video, ovozli xabar va h.k. — qabul qilinmaydi."""
     qi = (await state.get_data())["fqi"]
+    if qi >= len(config.FOLLOWUP_QUESTIONS):   # savollar dashboarddan o'zgartirilgan
+        return await ask_followup(msg, state, qi)
     if config.FOLLOWUP_QUESTIONS[qi]["type"] == "photo":
         await msg.answer("Iltimos, aynan rasm yuboring 📷 (video yoki stiker emas).")
     else:
@@ -740,6 +754,10 @@ async def followup_choice(cb: CallbackQuery, state: FSMContext):
     qi = int(qi)
     if qi != (await state.get_data()).get("fqi"):
         return await cb.answer()
+    if qi >= len(config.FOLLOWUP_QUESTIONS) or config.FOLLOWUP_QUESTIONS[qi]["type"] != "choice" \
+            or (oi != "skip" and int(oi) >= len(config.FOLLOWUP_QUESTIONS[qi]["options"])):
+        await cb.answer("Savol yangilandi, qaytadan tanlang")
+        return await ask_followup(cb.message, state, qi)
     q = config.FOLLOWUP_QUESTIONS[qi]
     value = "— (keyinroq)" if oi == "skip" else q["options"][int(oi)]
     await cb.message.edit_text(f"{q['text']}\n<b>{value}</b>")
@@ -1178,12 +1196,20 @@ async def main():
             logging.warning("Bot allaqachon ishlayapti (%s-port band) — ikkinchi nusxa ishga tushmaydi", config.DASHBOARD_PORT)
             return
     init_db()
+    import settings_store
+    if settings_store.load_and_apply():
+        logging.info("Dashboarddan saqlangan bot sozlamalari qo'llandi")
     bot = Bot(config.BOT_TOKEN, default=DefaultBotProperties(parse_mode="HTML"))
     import dashboard
     try:
         await dashboard.start(bot, sys.modules[__name__])
     except OSError as e:
         logging.error("Dashboard ishga tushmadi (%s-port band bo'lishi mumkin): %s", config.DASHBOARD_PORT, e)
+    if "--faqat-dashboard" in sys.argv:
+        # Bot serverda ishlaydi: bu yerda faqat dashboard (Telegram'dan xabar olinmaydi — Conflict bo'lmaydi)
+        logging.info("Faqat dashboard rejimi: %s-port", config.DASHBOARD_PORT)
+        print("Faqat dashboard ishga tushdi. To'xtatish: Ctrl+C")
+        await asyncio.Event().wait()
     print("Bot ishga tushdi. To'xtatish: Ctrl+C")
     await dp.start_polling(bot)
 

@@ -17,3 +17,5 @@ python/
 __pycache__/
 *.pyc
 *.tmp
+data/bot_sozlamalari.json
+data/bot_sozlamalari_tarix.jsonl

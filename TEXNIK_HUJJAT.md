@@ -35,6 +35,7 @@ Brauzer  ──HTTP :8800──>  dashboard.py (aiohttp) ── analytics.py / b
 | `analytics.py` | Qamrov, bo'sh hududlar (gaps), olti burchakli zonalar, hududlar kesimi, ma'lumot sifati |
 | `branch_store.py` | Filiallarni CRUD (fayl qulfi, zaxira nusxa, o'zgarishlar tarixi) |
 | `regions.py` | Viloyat → tumanlar ro'yxati (bot tugmalari uchun) |
+| `settings_store.py` | Dashboarddagi «Bot sozlamalari»: savollar, matnlar, baholash qoidalari → `data/bot_sozlamalari.json` (ishlab turgan botga darhol qo'llanadi) |
 | `config.py` | Barcha sozlamalar (maxfiy bo'lmaganlari) |
 | `config_local.py` | **Maxfiy:** `BOT_TOKEN`, `ADMIN_IDS`, `DASHBOARD_PASSWORD` (gitda yo'q; namuna — `config_local.example.py`) |
 | `offer.txt` | Tijoriy taklif matni (2-bosqich) |
@@ -96,6 +97,13 @@ Tarmoq: chiquvchi — `api.telegram.org:443`; kiruvchi — 8800 (faqat ichki tar
 | `MOS_EMAS_KM` | Lokatsiya tanlangan tumandan shuncha uzoq bo'lsa — ⚠️ | 40 km |
 | `DASHBOARD_PORT` | Dashboard porti | 8800 |
 | `APPROVED_TEXT` | Hujjatlar tasdiqlanganda odamga boradigan xabar | — |
+
+### Bot sozlamalarini dashboarddan o'zgartirish
+«06 · Bot sozlamalari» bo'limi: salomlashuv va boshqa matnlar, tijoriy taklif (`offer.txt`), 1- va 3-bosqich savollari,
+Issiq/Iliq chegaralari, masofa va zichlik chegaralari. Saqlanganda `data/bot_sozlamalari.json` yoziladi (gitda yo'q),
+`config` modulidagi qiymatlar almashtiriladi — qayta ishga tushirish shart emas. Har saqlashdan oldin nusxa
+`data/backups/bot_sozlamalari_*.json` ga, tarix `data/bot_sozlamalari_tarix.jsonl` ga yoziladi. `config.py` — asl qiymatlar
+(«Asl holiga qaytarish» tugmasi). API: `GET/POST /api/bot_settings`, `POST /api/bot_settings/reset`, `POST /api/recheck`.
 
 ## 6. Ma'lumotlar
 
